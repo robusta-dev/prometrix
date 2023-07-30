@@ -32,7 +32,9 @@ class PrometheusAuthorization:
 
     @classmethod
     def request_new_token(cls, config: PrometheusConfig) -> bool:
-        if cls.azure_authorization(config) and isinstance(config, AzurePrometheusConfig):
+        if cls.azure_authorization(config) and isinstance(
+            config, AzurePrometheusConfig
+        ):
             try:
                 if config.azure_use_managed_id:
                     res = requests.get(
