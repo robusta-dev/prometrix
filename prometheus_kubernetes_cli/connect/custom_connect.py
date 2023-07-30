@@ -10,7 +10,7 @@ from prometheus_kubernetes_cli.auth import PrometheusAuthorization
 from prometheus_kubernetes_cli.exceptions import (
     PrometheusFlagsConnectionError, PrometheusNotFound,
     VictoriaMetricsNotFound)
-from prometheus_kubernetes_cli.models import PrometheusApis, PrometheusConfig
+from prometheus_kubernetes_cli.models.prometheus_config import PrometheusApis, PrometheusConfig
 
 
 class CustomPrometheusConnect(PrometheusConnect):

@@ -8,7 +8,7 @@ from prometheus_kubernetes_cli.auth import PrometheusAuthorization
 from prometheus_kubernetes_cli.connect.aws_connect import AWSPrometheusConnect
 from prometheus_kubernetes_cli.connect.custom_connect import \
     CustomPrometheusConnect
-from prometheus_kubernetes_cli.models import (AWSPrometheusConfig,
+from prometheus_kubernetes_cli.models.prometheus_config import (AWSPrometheusConfig,
                                               PrometheusConfig)
 
 

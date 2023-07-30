@@ -3,7 +3,7 @@ from typing import Dict
 
 import requests
 
-from prometheus_kubernetes_cli.models import (AzurePrometheusConfig,
+from prometheus_kubernetes_cli.models.prometheus_config import (AzurePrometheusConfig,
                                               CoralogixPrometheusConfig,
                                               PrometheusConfig)
 
