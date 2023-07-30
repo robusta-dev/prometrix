@@ -4,18 +4,20 @@ from typing import Dict
 
 import requests
 
-from prometheus_kubernetes_cli.models import (
-    AzurePrometheusConfig,
-    CoralogixPrometheusConfig,
-    PrometheusConfig,
-)
+from prometheus_kubernetes_cli.models import (AzurePrometheusConfig,
+                                              CoralogixPrometheusConfig,
+                                              PrometheusConfig)
 
 
 class PrometheusAuthorization:
     bearer_token: str = ""
     azure_authorization: bool = (
-        os.environ.get("AZURE_CLIENT_ID", "") != "" and os.environ.get("AZURE_TENANT_ID", "") != ""
-    ) and (os.environ.get("AZURE_CLIENT_SECRET", "") != "" or os.environ.get("AZURE_USE_MANAGED_ID", "") != "")
+        os.environ.get("AZURE_CLIENT_ID", "") != ""
+        and os.environ.get("AZURE_TENANT_ID", "") != ""
+    ) and (
+        os.environ.get("AZURE_CLIENT_SECRET", "") != ""
+        or os.environ.get("AZURE_USE_MANAGED_ID", "") != ""
+    )
 
     @classmethod
     def get_authorization_headers(cls, config: PrometheusConfig) -> Dict:
@@ -56,7 +58,9 @@ class PrometheusAuthorization:
                         },
                     )
             except Exception:
-                logging.exception("Unexpected error when trying to generate azure access token.")
+                logging.exception(
+                    "Unexpected error when trying to generate azure access token."
+                )
                 return False
 
             if not res.ok:
