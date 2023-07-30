@@ -4,3 +4,7 @@
 *.xml
 
 *.iml
+
+*.whl
+
+*.gz

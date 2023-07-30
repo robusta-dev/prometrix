@@ -63,6 +63,7 @@ class AzurePrometheusConfig(PrometheusConfig):
     azure_token_endpoint: str
     azure_use_managed_id: Optional[str]
     azure_client_id: Optional[str]
+    azure_tenant_id: Optional[str]
     azure_client_secret: Optional[str]
 
 
@@ -153,9 +154,13 @@ class PrometheusQueryResult(BaseModel):
         elif result_type == "scalar" and isinstance(result, list):
             scalar_result = PrometheusScalarValue(result)
         elif result_type == "vector" and isinstance(result, list):
-            vector_result = [PrometheusVector(**vector_result) for vector_result in result]
+            vector_result = [
+                PrometheusVector(**vector_result) for vector_result in result
+            ]
         elif result_type == "matrix" and isinstance(result, list):
-            series_list_result = [PrometheusSeries(**series_list_result) for series_list_result in result]
+            series_list_result = [
+                PrometheusSeries(**series_list_result) for series_list_result in result
+            ]
         else:
             raise Exception("result or returnType is invalid")
 

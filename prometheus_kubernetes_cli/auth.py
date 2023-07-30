@@ -1,21 +1,23 @@
 import logging
-import os
 from typing import Dict
 
 import requests
 
-from prometheus_kubernetes_cli.models import (
-    AzurePrometheusConfig,
-    CoralogixPrometheusConfig,
-    PrometheusConfig,
-)
+from prometheus_kubernetes_cli.models import (AzurePrometheusConfig,
+                                              CoralogixPrometheusConfig,
+                                              PrometheusConfig)
 
 
 class PrometheusAuthorization:
     bearer_token: str = ""
-    azure_authorization: bool = (
-        os.environ.get("AZURE_CLIENT_ID", "") != "" and os.environ.get("AZURE_TENANT_ID", "") != ""
-    ) and (os.environ.get("AZURE_CLIENT_SECRET", "") != "" or os.environ.get("AZURE_USE_MANAGED_ID", "") != "")
+
+    @classmethod
+    def azure_authorization(cls, config: PrometheusConfig) -> bool:
+        if not isinstance(config, AzurePrometheusConfig):
+            return False
+        return (config.azure_client_id != "" and config.azure_tenant_id != "") and (
+            config.azure_client_secret != "" or config.azure_use_managed_id != ""
+        )
 
     @classmethod
     def get_authorization_headers(cls, config: PrometheusConfig) -> Dict:
@@ -23,14 +25,16 @@ class PrometheusAuthorization:
             return {"token": config.prometheus_token}
         elif config.prometheus_auth:
             return {"Authorization": config.prometheus_auth.get_secret_value()}
-        elif cls.azure_authorization:
+        elif cls.azure_authorization(config):
             return {"Authorization": (f"Bearer {cls.bearer_token}")}
         else:
             return {}
 
     @classmethod
     def request_new_token(cls, config: PrometheusConfig) -> bool:
-        if cls.azure_authorization and isinstance(config, AzurePrometheusConfig):
+        if cls.azure_authorization(config) and isinstance(
+            config, AzurePrometheusConfig
+        ):
             try:
                 if config.azure_use_managed_id:
                     res = requests.get(
@@ -56,7 +60,9 @@ class PrometheusAuthorization:
                         },
                     )
             except Exception:
-                logging.exception("Unexpected error when trying to generate azure access token.")
+                logging.exception(
+                    "Unexpected error when trying to generate azure access token."
+                )
                 return False
 
             if not res.ok:

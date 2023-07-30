@@ -1,13 +1,18 @@
+from collections import defaultdict
+from typing import Dict, List
+from urllib.parse import parse_qs
+
 from requests.sessions import merge_setting
 
 from prometheus_kubernetes_cli.auth import PrometheusAuthorization
-from prometheus_kubernetes_cli.custom_connect import AWSPrometheusConnect, CustomPrometheusConnect
-from prometheus_kubernetes_cli.models import AWSPrometheusConfig, PrometheusConfig
-from collections import defaultdict
-from typing import List, Dict
-from urllib.parse import parse_qs
+from prometheus_kubernetes_cli.connect.aws_connect import AWSPrometheusConnect
+from prometheus_kubernetes_cli.connect.custom_connect import \
+    CustomPrometheusConnect
+from prometheus_kubernetes_cli.models import (AWSPrometheusConfig,
+                                              PrometheusConfig)
 
-def parse_query_string(query_string: str) -> Dict[str, List[str]]:
+
+def _parse_query_string(query_string: str) -> Dict[str, List[str]]:
     if not query_string:
         return {}
     query_params = parse_qs(query_string, keep_blank_values=True)
@@ -19,8 +24,13 @@ def parse_query_string(query_string: str) -> Dict[str, List[str]]:
 
     return parsed_params
 
-def get_custom_prometheus_connect(prom_config: PrometheusConfig) -> "CustomPrometheusConnect":
-    prom_config.headers.update(PrometheusAuthorization.get_authorization_headers(prom_config))
+
+def get_custom_prometheus_connect(
+    prom_config: PrometheusConfig,
+) -> "CustomPrometheusConnect":
+    prom_config.headers.update(
+        PrometheusAuthorization.get_authorization_headers(prom_config)
+    )
     if isinstance(prom_config, AWSPrometheusConfig):
         prom = AWSPrometheusConnect(
             access_key=prom_config.access_key,
@@ -33,7 +43,9 @@ def get_custom_prometheus_connect(prom_config: PrometheusConfig) -> "CustomProme
         prom = CustomPrometheusConnect(config=prom_config)
 
     if prom_config.prometheus_url_query_string:
-        query_string_params = parse_query_string(prom_config.prometheus_url_query_string)
+        query_string_params = _parse_query_string(
+            prom_config.prometheus_url_query_string
+        )
         prom._session.params = merge_setting(prom._session.params, query_string_params)
     prom.config = prom_config
     return prom
