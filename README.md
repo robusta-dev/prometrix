@@ -4,8 +4,9 @@ Prometrix - Unified Prometheus Client
 Overview
 --------
 
-This Python package provides a unified Prometheus client that can be used to connect to and query various types of Prometheus instances. The package supports the following additional Prometheus types:
+This Python package provides a unified Prometheus client that can be used to connect to and query various types of Prometheus instances. The package is based on the [prometheus-api-client](https://pypi.org/project/prometheus-api-client/)  package , which serves as the foundation for our extended functionality.
 
+The prometrix package enhances the prometheus-api-client by adding vendor-specific authentication methods and other features to handle authorization and signatures for all supported clients. This ensures a secure and seamless connection to the various types of Prometheus instances.
 1.  Coralogix
 2.  GKE (Google Kubernetes Engine)
 3.  Azure
@@ -14,6 +15,7 @@ This Python package provides a unified Prometheus client that can be used to con
 6.  Victoria Metrics
 
 The main function, `get_custom_prometheus_connect`, allows you to create a custom Prometheus client based on the provided configuration. The configurations for special Prometheus versions are defined through specific classes, each extending the base `PrometheusConfig` class. Additionally, our package handles authorization and signatures for all the clients, ensuring a secure and seamless connection.
+
 Installation
 ------------
 
@@ -78,9 +80,9 @@ azure_config = AzurePrometheusConfig(
 azure_client = get_custom_prometheus_connect(azure_config)
 ```
 
-# Similar configuration and creation can be done for EKS, Thanos, and Victoria Metrics Prometheus.`
+Similar configuration and creation can be done for EKS, Thanos, and Victoria Metrics Prometheus.
 
-Note that you need to replace the placeholder values (e.g., YOUR_CORALOGIX_PROMETHEUS_TOKEN) with your actual credentials and endpoints.
+> **_NOTE:_** You need to replace the placeholder values (e.g., YOUR_CORALOGIX_PROMETHEUS_TOKEN) with your actual credentials and endpoints.
 
 ### Supported APIs
 
