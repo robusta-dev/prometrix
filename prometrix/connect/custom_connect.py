@@ -79,7 +79,7 @@ class CustomPrometheusConnect(PrometheusConnect):
     def get_label_values(self, label_name: str, params: dict = None):
         if PrometheusApis.LABELS not in self.config.supported_apis:
             raise PrometheusApiClientException("Labels Api not supported")
-        return super().get_label_values(label_name,params)
+        return super().get_label_values(label_name, params)
 
     def custom_query(self, query: str, params: dict = None):
         response = self._custom_query(query, params)

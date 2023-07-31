@@ -7,7 +7,7 @@ from prometrix.exceptions import (MetricsNotFound,
                                   VictoriaMetricsNotFound)
 from prometrix.models.prometheus_config import (
     AWSPrometheusConfig, AzurePrometheusConfig, CoralogixPrometheusConfig,
-    PrometheusConfig, VictoriaMetricsPrometheusConfig, PrometheusApis)
+    PrometheusApis, PrometheusConfig, VictoriaMetricsPrometheusConfig)
 from prometrix.models.prometheus_result import (PrometheusMetric,
                                                 PrometheusQueryResult,
                                                 PrometheusScalarValue,

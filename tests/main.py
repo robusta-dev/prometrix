@@ -1,16 +1,16 @@
 import json
+import os.path
 from datetime import datetime, timedelta
 from typing import Dict
 
+import yaml
 from prometheus_api_client import PrometheusApiClientException
 from pydantic import ValidationError
-import yaml
-import os.path
 
-from prometrix import ( AWSPrometheusConfig, AzurePrometheusConfig,
-                       CoralogixPrometheusConfig, PrometheusConfig,
-                       PrometheusNotFound, PrometheusQueryResult,
-                       get_custom_prometheus_connect, PrometheusApis, CustomPrometheusConnect)
+from prometrix import (AWSPrometheusConfig, AzurePrometheusConfig,
+                       CoralogixPrometheusConfig, CustomPrometheusConnect,
+                       PrometheusApis, PrometheusConfig, PrometheusNotFound,
+                       PrometheusQueryResult, get_custom_prometheus_connect)
 
 
 def generate_prometheus_config(
@@ -24,6 +24,7 @@ def generate_prometheus_config(
         return AzurePrometheusConfig(**params)
     return PrometheusConfig(**params)
 
+
 def test_label(prom: CustomPrometheusConnect) -> bool:
     if PrometheusApis.LABELS in prom.config.supported_apis:
         return len(prom.get_label_values("pod")) > 0
@@ -33,9 +34,12 @@ def test_label(prom: CustomPrometheusConnect) -> bool:
     except PrometheusApiClientException:
         return True
 
+
 def check_result_not_empty(result: PrometheusQueryResult) -> bool:
     if result.result_type != "matrix":
-        print(f"Prometheus tests for results of type {result.result_type} not supported yet")
+        print(
+            f"Prometheus tests for results of type {result.result_type} not supported yet"
+        )
         return False
     for series in result.series_list_result:
         if len(series.values) > 1 and len(series.timestamps) > 1:
@@ -68,9 +72,11 @@ def run_test(test_type: str, config: PrometheusConfig):
 
 
 def main():
-    test_config_file_name="config.yaml"
+    test_config_file_name = "config.yaml"
     if not os.path.isfile(test_config_file_name):
-        print(f"To run tests you must create a test config file called '{test_config_file_name}'.\n See 'test_config_example.yaml' for the format and examples")
+        print(
+            f"To run tests you must create a test config file called '{test_config_file_name}'.\n See 'test_config_example.yaml' for the format and examples"
+        )
         return
 
     with open(test_config_file_name, "r") as tests_yaml_file:
