@@ -8,5 +8,5 @@ from prometrix.exceptions import (MetricsNotFound,
 from prometrix.models.prometheus_config import (
     AWSPrometheusConfig, AzurePrometheusConfig, CoralogixPrometheusConfig,
     PrometheusConfig, VictoriaMetricsPrometheusConfig)
-from prometrix.models.prometheus_result import PrometheusQueryResult
+from prometrix.models.prometheus_result import PrometheusQueryResult, PrometheusScalarValue, PrometheusScalarValue, PrometheusSeries, PrometheusMetric
 from prometrix.utils import get_custom_prometheus_connect
