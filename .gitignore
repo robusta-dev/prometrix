@@ -8,3 +8,7 @@
 *.whl
 
 *.gz
+
+tests/config.yaml
+
+*.pyc
