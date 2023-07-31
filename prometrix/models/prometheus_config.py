@@ -3,6 +3,7 @@ from typing import Dict, List, Optional
 
 from pydantic import BaseModel, SecretStr
 
+
 class PrometheusApis(Enum):
     QUERY = 0
     QUERY_RANGE = 1

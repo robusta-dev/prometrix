@@ -111,7 +111,3 @@ Acknowledgments
 ---------------
 
 This package was inspired by the need to have a flexible and generic Prometheus client that can be easily extended to connect with different Prometheus types. Special thanks to the Prometheus team and the open-source community for their contributions.
-
-* * * * *
-
-Feel free to modify and add more details to this README as per your specific project's needs. Remember to include information about the package installation, setup, and any other relevant instructions.

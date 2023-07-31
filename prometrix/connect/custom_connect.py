@@ -1,5 +1,6 @@
-from typing import Dict, Optional
 from datetime import datetime
+from typing import Dict, Optional
+
 import requests
 from prometheus_api_client import (PrometheusApiClientException,
                                    PrometheusConnect)
@@ -7,9 +8,8 @@ from requests.adapters import HTTPAdapter
 from requests.exceptions import ConnectionError, HTTPError
 
 from prometrix.auth import PrometheusAuthorization
-from prometrix.exceptions import (
-    PrometheusFlagsConnectionError, PrometheusNotFound,
-    VictoriaMetricsNotFound)
+from prometrix.exceptions import (PrometheusFlagsConnectionError,
+                                  PrometheusNotFound, VictoriaMetricsNotFound)
 from prometrix.models.prometheus_config import PrometheusApis, PrometheusConfig
 
 

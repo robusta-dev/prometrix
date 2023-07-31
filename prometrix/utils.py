@@ -6,8 +6,7 @@ from requests.sessions import merge_setting
 
 from prometrix.auth import PrometheusAuthorization
 from prometrix.connect.aws_connect import AWSPrometheusConnect
-from prometrix.connect.custom_connect import \
-    CustomPrometheusConnect
+from prometrix.connect.custom_connect import CustomPrometheusConnect
 from prometrix.models.prometheus_config import (AWSPrometheusConfig,
                                                 PrometheusConfig)
 
