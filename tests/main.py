@@ -1,13 +1,16 @@
 import json
 from datetime import datetime, timedelta
 from typing import Dict
+
+from prometheus_api_client import PrometheusApiClientException
 from pydantic import ValidationError
 import yaml
 import os.path
-from prometrix import (AWSPrometheusConfig, AzurePrometheusConfig,
+
+from prometrix import ( AWSPrometheusConfig, AzurePrometheusConfig,
                        CoralogixPrometheusConfig, PrometheusConfig,
                        PrometheusNotFound, PrometheusQueryResult,
-                       get_custom_prometheus_connect)
+                       get_custom_prometheus_connect, PrometheusApis, CustomPrometheusConnect)
 
 
 def generate_prometheus_config(
@@ -21,6 +24,14 @@ def generate_prometheus_config(
         return AzurePrometheusConfig(**params)
     return PrometheusConfig(**params)
 
+def test_label(prom: CustomPrometheusConnect) -> bool:
+    if PrometheusApis.LABELS in prom.config.supported_apis:
+        return len(prom.get_label_values("pod")) > 0
+    try:
+        prom.get_label_values("pod")
+        return False
+    except PrometheusApiClientException:
+        return True
 
 def check_result_not_empty(result: PrometheusQueryResult) -> bool:
     if result.result_type != "matrix":
@@ -36,6 +47,9 @@ def run_test(test_type: str, config: PrometheusConfig):
     try:
         prom_cli = get_custom_prometheus_connect(config)
         prom_cli.check_prometheus_connection()
+        if not test_label(prom_cli):
+            print(f"Test {test_type} failed, error with label api")
+            return
         result = prom_cli.custom_query_range(
             query="container_memory_working_set_bytes",
             start_time=datetime.now() - timedelta(days=1),
@@ -45,6 +59,7 @@ def run_test(test_type: str, config: PrometheusConfig):
         formatted_result = PrometheusQueryResult(data=result)
         if not check_result_not_empty(formatted_result):
             print(f"Test {test_type} failed, empty or invalid results")
+            return
         print(f"Test {test_type} passed")
     except PrometheusNotFound:
         print(f"Test {test_type} failed, could not connect to prometheus")
