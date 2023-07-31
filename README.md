@@ -14,7 +14,7 @@ The prometrix package enhances the prometheus-api-client by adding vendor-specif
 5.  Thanos
 6.  Victoria Metrics
 
-The main function, `get_custom_prometheus_connect`, allows you to create a custom Prometheus client based on the provided configuration. The configurations for special Prometheus versions are defined through specific classes, each extending the base `PrometheusConfig` class. Additionally, our package handles authorization and signatures for all the clients, ensuring a secure and seamless connection.
+The main function, `get_custom_prometheus_connect`, allows you to create a custom Prometheus client based on the provided configuration. The configurations for special Prometheus versions are defined through specific classes, each extending the base `PrometheusConfig` class.
 
 Installation
 ------------
