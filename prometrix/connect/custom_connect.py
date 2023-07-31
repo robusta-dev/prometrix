@@ -1,16 +1,16 @@
-from typing import Any, Dict, Optional
-
+from typing import Dict, Optional
+from datetime import datetime
 import requests
 from prometheus_api_client import (PrometheusApiClientException,
                                    PrometheusConnect)
 from requests.adapters import HTTPAdapter
 from requests.exceptions import ConnectionError, HTTPError
 
-from prometheus_kubernetes_cli.auth import PrometheusAuthorization
-from prometheus_kubernetes_cli.exceptions import (
+from prometrix.auth import PrometheusAuthorization
+from prometrix.exceptions import (
     PrometheusFlagsConnectionError, PrometheusNotFound,
     VictoriaMetricsNotFound)
-from prometheus_kubernetes_cli.models.prometheus_config import PrometheusApis, PrometheusConfig
+from prometrix.models.prometheus_config import PrometheusApis, PrometheusConfig
 
 
 class CustomPrometheusConnect(PrometheusConnect):
