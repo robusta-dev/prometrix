@@ -22,7 +22,7 @@ Installation
 You can install the package using pip:
 
 ```
-pip install generic-prometheus-client
+pip install prometrix
 ```
 
 Usage
@@ -31,8 +31,8 @@ Usage
 ### Importing the package
 
 ```
-from generic_prometheus_client import get_custom_prometheus_connect
-from generic_prometheus_client.config import (
+from prometrix import get_custom_prometheus_connect
+from prometrix.config import (
     PrometheusConfig,
     AWSPrometheusConfig,
     CoralogixPrometheusConfig,
