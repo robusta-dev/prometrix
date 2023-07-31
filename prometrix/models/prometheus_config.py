@@ -65,3 +65,7 @@ class AzurePrometheusConfig(PrometheusConfig):
     azure_client_id: Optional[str]
     azure_tenant_id: Optional[str]
     azure_client_secret: Optional[str]
+    supported_apis: List[PrometheusApis] = [
+        PrometheusApis.QUERY,
+        PrometheusApis.QUERY_RANGE,
+    ]
