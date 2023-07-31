@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from typing import Dict
 from pydantic import ValidationError
 import yaml
-
+import os.path
 from prometrix import (AWSPrometheusConfig, AzurePrometheusConfig,
                        CoralogixPrometheusConfig, PrometheusConfig,
                        PrometheusNotFound, PrometheusQueryResult,
@@ -53,7 +53,12 @@ def run_test(test_type: str, config: PrometheusConfig):
 
 
 def main():
-    with open("config.yaml", "r") as tests_yaml_file:
+    test_config_file_name="config.yaml"
+    if not os.path.isfile(test_config_file_name):
+        print(f"To run tests you must create a test config file called '{test_config_file_name}'.\n See 'test_config_example.yaml' for the format and examples")
+        return
+
+    with open(test_config_file_name, "r") as tests_yaml_file:
         yaml_obj = yaml.safe_load(
             tests_yaml_file
         )  # yaml_object will be a list or a dict
