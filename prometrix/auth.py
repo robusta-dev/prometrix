@@ -3,9 +3,9 @@ from typing import Dict
 
 import requests
 
-from prometheus_kubernetes_cli.models import (AzurePrometheusConfig,
-                                              CoralogixPrometheusConfig,
-                                              PrometheusConfig)
+from prometrix.models.prometheus_config import (AzurePrometheusConfig,
+                                                CoralogixPrometheusConfig,
+                                                PrometheusConfig)
 
 
 class PrometheusAuthorization:

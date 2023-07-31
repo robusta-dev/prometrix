@@ -4,12 +4,12 @@ from urllib.parse import parse_qs
 
 from requests.sessions import merge_setting
 
-from prometheus_kubernetes_cli.auth import PrometheusAuthorization
-from prometheus_kubernetes_cli.connect.aws_connect import AWSPrometheusConnect
-from prometheus_kubernetes_cli.connect.custom_connect import \
+from prometrix.auth import PrometheusAuthorization
+from prometrix.connect.aws_connect import AWSPrometheusConnect
+from prometrix.connect.custom_connect import \
     CustomPrometheusConnect
-from prometheus_kubernetes_cli.models import (AWSPrometheusConfig,
-                                              PrometheusConfig)
+from prometrix.models.prometheus_config import (AWSPrometheusConfig,
+                                                PrometheusConfig)
 
 
 def _parse_query_string(query_string: str) -> Dict[str, List[str]]:

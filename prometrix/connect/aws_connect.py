@@ -6,7 +6,7 @@ from botocore.awsrequest import AWSRequest
 from botocore.credentials import Credentials
 from prometheus_api_client import PrometheusApiClientException
 
-from prometheus_kubernetes_cli.connect.custom_connect import \
+from prometrix.connect.custom_connect import \
     CustomPrometheusConnect
 
 
