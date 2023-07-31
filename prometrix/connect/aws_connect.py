@@ -110,6 +110,26 @@ class AWSPrometheusConnect(CustomPrometheusConnect):
                 )
             )
 
+    def get_label_values(self, label_name: str, params: dict = None):
+        params = params or {}
+        response = self.signed_request(
+            method="POST",
+            url="{0}/api/v1/label/{1}/values".format(self.url, label_name),
+            data={
+                **params,
+            },
+            verify=self.ssl_verification,
+            headers=self.headers,
+        )
+        if response.status_code == 200:
+            return response.json()["data"]
+        else:
+            raise PrometheusApiClientException(
+                "HTTP Status Code {} ({!r})".format(
+                    response.status_code, response.content
+                )
+            )
+
     def all_metrics(self, *args, **kwargs):
         raise NotImplementedError()
 
