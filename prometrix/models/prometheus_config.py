@@ -56,6 +56,7 @@ class VictoriaMetricsPrometheusConfig(PrometheusConfig):
         PrometheusApis.VM_FLAGS,
     ]
 
+
 # Does not support labels according to the docs, See below for apis
 # https://learn.microsoft.com/en-us/azure/azure-monitor/essentials/prometheus-api-promql#supported-apis
 class AzurePrometheusConfig(PrometheusConfig):

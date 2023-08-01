@@ -1,5 +1,5 @@
 import logging
-from typing import Dict
+from typing import Dict, no_type_check
 
 import requests
 
@@ -30,6 +30,35 @@ class PrometheusAuthorization:
         else:
             return {}
 
+    @no_type_check
+    @classmethod
+    def _get_azure_metadata_endpoint(cls, config: PrometheusConfig):
+        return requests.get(
+            url=config.azure_metadata_endpoint,
+            headers={
+                "Metadata": "true",
+            },
+            data={
+                "api-version": "2018-02-01",
+                "client_id": config.azure_client_id,
+                "resource": config.azure_resource,
+            },
+        )
+
+    @no_type_check
+    @classmethod
+    def _post_azure_token_endpoint(cls, config: PrometheusConfig):
+        return requests.post(
+            url=config.azure_token_endpoint,
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+            data={
+                "grant_type": "client_credentials",
+                "client_id": config.azure_client_id,
+                "client_secret": config.azure_client_secret,
+                "resource": config.azure_resource,
+            },
+        )
+
     @classmethod
     def request_new_token(cls, config: PrometheusConfig) -> bool:
         if cls.azure_authorization(config) and isinstance(
@@ -37,28 +66,9 @@ class PrometheusAuthorization:
         ):
             try:
                 if config.azure_use_managed_id:
-                    res = requests.get(
-                        url=config.azure_metadata_endpoint,
-                        headers={
-                            "Metadata": "true",
-                        },
-                        data={
-                            "api-version": "2018-02-01",
-                            "client_id": config.azure_client_id,
-                            "resource": config.azure_resource,
-                        },
-                    )
+                    res = cls._get_azure_metadata_endpoint(config)
                 else:
-                    res = requests.post(
-                        url=config.azure_token_endpoint,
-                        headers={"Content-Type": "application/x-www-form-urlencoded"},
-                        data={
-                            "grant_type": "client_credentials",
-                            "client_id": config.azure_client_id,
-                            "client_secret": config.azure_client_secret,
-                            "resource": config.azure_resource,
-                        },
-                    )
+                    res = cls._post_azure_token_endpoint(config)
             except Exception:
                 logging.exception(
                     "Unexpected error when trying to generate azure access token."

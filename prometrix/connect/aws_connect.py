@@ -129,13 +129,13 @@ class AWSPrometheusConnect(CustomPrometheusConnect):
             )
 
     def all_metrics(self, *args, **kwargs):
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def get_current_metric_value(self, *args, **kwargs):
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def get_metric_range_data(self, *args, **kwargs):
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def get_metric_aggregation(self, *args, **kwargs):
-        raise NotImplementedError()
+        raise NotImplementedError
