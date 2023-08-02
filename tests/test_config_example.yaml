@@ -1,0 +1,30 @@
+testConfig:
+    - type: "PrometheusConfig"
+      params:
+        url:
+        disable_ssl:
+        headers:
+        prometheus_auth:
+        prometheus_url_query_string:
+        additional_labels:
+    - type: "AWSPrometheusConfig"
+      params:
+        url:
+        access_key:
+        secret_access_key:
+        service_name:
+        aws_region:
+    - type: "CoralogixPrometheusConfig"
+      params:
+        url:
+        prometheus_token:
+    - type: "AzurePrometheusConfig"
+      params:
+        url:
+        azure_resource:
+        azure_metadata_endpoint:
+        azure_token_endpoint:
+        azure_use_managed_id:
+        azure_client_id:
+        azure_tenant_id:
+        azure_client_secret:

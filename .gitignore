@@ -1,0 +1,14 @@
+
+.DS_Store
+
+*.xml
+
+*.iml
+
+*.whl
+
+*.gz
+
+tests/config.yaml
+
+*.pyc
