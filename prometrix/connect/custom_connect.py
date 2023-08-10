@@ -84,7 +84,7 @@ class CustomPrometheusConnect(PrometheusConnect):
     def custom_query(self, query: str, params: dict = None):
         response = self._custom_query(query, params)
         if response.status_code == 200:
-            data = response.json()["data"]["result"]
+            data = response.json()["data"]
         else:
             raise PrometheusApiClientException(
                 "HTTP Status Code {} ({!r})".format(
