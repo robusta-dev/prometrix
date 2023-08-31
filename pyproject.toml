@@ -1,10 +1,14 @@
 [tool.poetry]
 name = "prometrix"
-version = "0.1.11"
-description = ""
-authors = ["Avi Kotlicky <kotlickya@gmail.com>"]
+version = "0.1.12"
+authors = ["Avi Kotlicky <avi@robusta.dev>"]
 readme = "README.md"
 packages = [{include = "prometrix"}]
+description = "A Python Prometheus client for all Prometheus instances."
+
+[project.urls]
+"Homepage" = "https://github.com/robusta-dev/prometrix"
+"Bug Tracker" = "https://github.com/robusta-dev/prometrix/issues"
 
 [tool.poetry.dependencies]
 python = "^3.8"
