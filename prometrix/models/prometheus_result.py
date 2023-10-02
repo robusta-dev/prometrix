@@ -35,6 +35,8 @@ class PrometheusVector(BaseModel):
     metric: PrometheusMetric
     value: PrometheusScalarValue
 
+    def __init__(self, metric, value):
+        super().__init__(metric=metric, value=PrometheusScalarValue(value))
 
 class PrometheusSeries(BaseModel):
     metric: PrometheusMetric
