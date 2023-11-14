@@ -104,6 +104,17 @@ Contributing
 
 If you'd like to contribute to this package, please follow the guidelines specified in the CONTRIBUTING.md file in the repository.
 
+Releasing
+----------
+
+To release a new version, bump the version number in pyproject.toml and run:
+
+```
+poetry publish --build --username=<username> --password=<password>
+```
+
+We're planning to automate this with GitHub actions but it hasn't been fully setup or tested yet.
+
 License
 -------
 
