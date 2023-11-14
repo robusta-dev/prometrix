@@ -26,7 +26,7 @@ def _parse_query_string(query_string: str) -> Dict[str, List[str]]:
 
 def get_custom_prometheus_connect(
     prom_config: PrometheusConfig,
-) -> "CustomPrometheusConnect":
+) -> CustomPrometheusConnect:
     prom_config.headers.update(
         PrometheusAuthorization.get_authorization_headers(prom_config)
     )

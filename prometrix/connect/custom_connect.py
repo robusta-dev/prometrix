@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 
 import requests
 from prometheus_api_client import (PrometheusApiClientException,
@@ -168,3 +168,46 @@ class CustomPrometheusConnect(PrometheusConnect):
             raise VictoriaMetricsNotFound(
                 f"Couldn't connect to VictoriaMetrics found under {self.url}\nCaused by {e.__class__.__name__}: {e})"
             ) from e
+
+    def get_series(self, match: List[str], start_time: Optional[datetime] = None,
+                   end_time: Optional[datetime] = None, params: dict = None) -> Dict:
+        """
+        Retrieves a dictionary of series that match the specified label sets from Prometheus.
+
+        :param match: (List[str]) List of string selectors to specify the series to match.
+        :param start_time: (Optional[datetime]) The start time for the query as a datetime object.
+        :param end_time: (Optional[datetime]) The end time for the query as a datetime object.
+        :param params: (Optional[dict]) Additional parameters to be sent in the query.
+        :returns: (dict) A dictionary of the query results, which includes the series of matched metrics.
+        :raises:
+            (PrometheusApiClientException) Raises an exception with details of the response, in case of a non 200 HTTP status code.
+        """
+        params = params or {}
+
+        # The data to be sent with the POST request
+        data = {
+            'match[]': match,
+        }
+
+        # Include start and end time in the data if provided
+        if start_time:
+            data['start'] = round(start_time.timestamp())
+        if end_time:
+            data['end'] = round(end_time.timestamp())
+
+        response = self._session.post(
+            f"{self.url}/api/v1/series",
+            data=data,
+            verify=self.ssl_verification,
+            headers=self.headers,
+            params=params,
+        )
+        if response.status_code == 200:
+            return response.json()["data"]
+        else:
+            raise PrometheusApiClientException(
+                f"Failed to retrieve `series` data from Prometheus. "
+                f"Response status: {response.status_code!r}. "
+                f"Response content: {response.content!r}.  "
+            )
+
