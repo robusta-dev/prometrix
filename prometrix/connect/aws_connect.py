@@ -141,36 +141,10 @@ class AWSPrometheusConnect(CustomPrometheusConnect):
             (RequestException) Raises an exception in case of a connection error
             (PrometheusApiClientException) Raises in case of non 200 response status code
         """
-        self._all_metrics = self.get_label_values(label_name="__name__", params=params)
-        return self._all_metrics
+        return self.get_label_values(label_name="__name__", params=params)
 
-    def get_series(self, match: List[str], start_time: Optional[datetime] = None,
-                   end_time: Optional[datetime] = None, params: dict = None) -> Dict:
-        """
-        Retrieves a dictionary of series that match the specified label sets from Prometheus.
-
-        :param match: (List[str]) List of string selectors to specify the series to match.
-        :param start_time: (Optional[datetime]) The start time for the query as a datetime object.
-        :param end_time: (Optional[datetime]) The end time for the query as a datetime object.
-        :param params: (Optional[dict]) Additional parameters to be sent in the query.
-        :returns: (dict) A dictionary of the query results, which includes the series of matched metrics.
-        :raises:
-            (PrometheusApiClientException) Raises an exception with details of the response, in case of a non 200 HTTP status code.
-        """
-        params = params or {}
-
-        # The data to be sent with the POST request
-        data = {
-            'match[]': match,
-        }
-
-        # Include start and end time in the data if provided
-        if start_time:
-            data['start'] = round(start_time.timestamp())
-        if end_time:
-            data['end'] = round(end_time.timestamp())
-
-        response = self.signed_request(
+    def _send_series(self, data: dict, params: dict) -> requests.Response:
+        return self.signed_request(
             method="POST",
             url=f"{self.url}/api/v1/series",
             data=data,
@@ -178,14 +152,6 @@ class AWSPrometheusConnect(CustomPrometheusConnect):
             params=params,
             verify=self.ssl_verification,
         )
-        if response.status_code == 200:
-            return response.json()["data"]
-        else:
-            raise PrometheusApiClientException(
-                f"Failed to retrieve `series` data from Prometheus. "
-                f"Response status: {response.status_code!r}. "
-                f"Response content: {response.content!r}.  "
-            )
 
     def get_current_metric_value(self, *args, **kwargs):
         raise NotImplementedError

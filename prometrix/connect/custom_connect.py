@@ -169,6 +169,15 @@ class CustomPrometheusConnect(PrometheusConnect):
                 f"Couldn't connect to VictoriaMetrics found under {self.url}\nCaused by {e.__class__.__name__}: {e})"
             ) from e
 
+    def _send_series(self, data: dict, params: dict) -> requests.Response:
+        return self._session.post(
+            f"{self.url}/api/v1/series",
+            data=data,
+            verify=self.ssl_verification,
+            headers=self.headers,
+            params=params,
+        )
+
     def get_series(self, match: List[str], start_time: Optional[datetime] = None,
                    end_time: Optional[datetime] = None, params: dict = None) -> Dict:
         """
@@ -195,13 +204,7 @@ class CustomPrometheusConnect(PrometheusConnect):
         if end_time:
             data['end'] = round(end_time.timestamp())
 
-        response = self._session.post(
-            f"{self.url}/api/v1/series",
-            data=data,
-            verify=self.ssl_verification,
-            headers=self.headers,
-            params=params,
-        )
+        response = self._send_series(data=data, params=params)
         if response.status_code == 200:
             return response.json()["data"]
         else:
