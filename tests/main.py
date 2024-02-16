@@ -54,7 +54,7 @@ def run_test(test_type: str, config: PrometheusConfig):
         if not test_label(prom_cli):
             print(f"Test {test_type} failed, error with label api")
             return
-        result = prom_cli.custom_query_range(
+        result = prom_cli.safe_custom_query_range(
             query="container_memory_working_set_bytes",
             start_time=datetime.now() - timedelta(days=1),
             end_time=datetime.now(),

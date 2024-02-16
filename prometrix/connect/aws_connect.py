@@ -63,7 +63,7 @@ class AWSPrometheusConnect(CustomPrometheusConnect):
         )
         return response
 
-    def custom_query_range(
+    def safe_custom_query_range(
         self,
         query: str,
         start_time: datetime,
