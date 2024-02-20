@@ -99,6 +99,26 @@ check_prometheus_connection(self, params: dict = None)
 The `check_prometheus_connection` function enables you to check the connection status with the Prometheus instance. You can pass an optional dictionary of parameters to customize the connection check. This function returns true if it is able to connect.
 
 
+```
+safe_custom_query_range
+```
+
+The `safe_custom_query_range` function retrieves time-series data from Prometheus over a specified range. It returns the queried data in JSON format or raises an exception if the request fails.
+
+**Differences between `custom_query_range` and `safe_custom_query_range`:**
+- `custom_query_range` is a feature of the `prometheus_api_client` library, utilized internally by Prometrix.
+- `safe_custom_query_range` returns the entire `data` dictionary from the Prometheus query response, whereas `custom_query_range` only returns the `result` section.
+
+```
+safe_custom_query
+```
+The `safe_custom_query` function executes a single-point Prometheus query and returns the result in JSON format. It throws an exception in the event of an error.
+
+**Differences between `custom_query` and `safe_custom_query`:**
+- `custom_query` is part of the `prometheus_api_client` library, used internally by Prometrix.
+- `safe_custom_query` returns the complete `data` dictionary of the Prometheus query response, in contrast to `custom_query`, which only returns the `result` section.
+
+
 Contributing
 ------------
 
