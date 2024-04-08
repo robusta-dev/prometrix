@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "prometrix"
-version = "0.1.16"
+version = "0.1.17"
 authors = ["Avi Kotlicky <avi@robusta.dev>"]
 readme = "README.md"
 packages = [{include = "prometrix"}]
@@ -16,6 +16,9 @@ boto3 = "^1.28.15"
 botocore = "^1.31.15"
 pydantic = "^1.8.1"
 prometheus-api-client = "^0.5.3"
+pillow = "^10.3.0" # added to Pin transitive dependency, not needed directly
+fonttools = "^4.43.0" # added to Pin transitive dependency, not needed directly
+urllib3 = "^1.26.18" # added to Pin transitive dependency, not needed directly
 
 
 [build-system]
