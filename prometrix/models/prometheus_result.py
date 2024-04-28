@@ -70,10 +70,10 @@ class PrometheusQueryResult(BaseModel):
     """
 
     result_type: str
-    vector_result: Optional[List[PrometheusVector]]
-    series_list_result: Optional[List[PrometheusSeries]]
-    scalar_result: Optional[PrometheusScalarValue]
-    string_result: Optional[str]
+    vector_result: Optional[List[PrometheusVector]] = None
+    series_list_result: Optional[List[PrometheusSeries]] = None
+    scalar_result: Optional[PrometheusScalarValue] = None
+    string_result: Optional[str] = None
 
     def __init__(self, data):
         result = data.get("result", None)
