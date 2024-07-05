@@ -40,12 +40,12 @@ jobs:
             poetry config virtualenvs.create false
             poetry install --with test
 
-        - name: Setup Prometrix <-> Github runner tunnel
-          uses: vbem/k8s-port-forward@v1
-          with:
-            workload: 'service/kind-prometheus-kube-prome-prometheus'
-            mappings: 9090:9090
-            namespace: prometheus
+#        - name: Setup Prometrix <-> Github runner tunnel
+#          uses: vbem/k8s-port-forward@v1
+#          with:
+#            workload: 'service/kind-prometheus-kube-prome-prometheus'
+#            mappings: 9090:9090
+#            namespace: prometheus
 
         - name: Run Prometrix tests
           run: |
