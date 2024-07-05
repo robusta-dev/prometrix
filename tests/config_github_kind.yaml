@@ -3,3 +3,4 @@ testConfig:
     params:
       url: http://localhost:9090
       query_step: "5s"
+      query_interval: "15s"

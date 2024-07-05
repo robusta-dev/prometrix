@@ -6,6 +6,7 @@ from typing import Dict
 import yaml
 from prometheus_api_client import PrometheusApiClientException
 from pydantic import ValidationError
+from pytimeparse.timeparse import timeparse
 
 from prometrix import (AWSPrometheusConfig, AzurePrometheusConfig,
                        CoralogixPrometheusConfig, CustomPrometheusConnect,
@@ -56,7 +57,7 @@ def run_test(test_type: str, config: PrometheusConfig) -> bool:
             return False
         result = prom_cli.safe_custom_query_range(
             query="container_memory_working_set_bytes",
-            start_time=datetime.now() - timedelta(days=1),
+            start_time=datetime.now() - timedelta(seconds=timeparse(config.query_interval)),
             end_time=datetime.now(),
             step=config.query_step,
         )
