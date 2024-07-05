@@ -58,7 +58,7 @@ def run_test(test_type: str, config: PrometheusConfig) -> bool:
             query="container_memory_working_set_bytes",
             start_time=datetime.now() - timedelta(days=1),
             end_time=datetime.now(),
-            step="5m",
+            step=config.query_step,
         )
         formatted_result = PrometheusQueryResult(data=result)
         if not check_result_not_empty(formatted_result):

@@ -25,6 +25,7 @@ class PrometheusConfig(BaseModel):
         PrometheusApis.LABELS,
         PrometheusApis.FLAGS,
     ]
+    query_step: str = "5m"
 
 
 class AWSPrometheusConfig(PrometheusConfig):

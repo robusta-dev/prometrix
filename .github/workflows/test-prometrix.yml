@@ -55,4 +55,5 @@ jobs:
 
       - name: Run Prometrix tests
         run: |
+          sleep 10
           python tests/main.py tests/config_github_kind.yaml
