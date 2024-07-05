@@ -49,7 +49,9 @@ def check_result_not_empty(result: PrometheusQueryResult) -> bool:
 
 def run_test(test_type: str, config: PrometheusConfig):
     try:
+        print(f"run_test: config {config}")
         prom_cli = get_custom_prometheus_connect(config)
+        print(f"prom_cli config {prom_cli.config}")
         prom_cli.check_prometheus_connection()
         if not test_label(prom_cli):
             print(f"Test {test_type} failed, error with label api")
@@ -84,6 +86,7 @@ def main(config_file="config.yaml"):
             tests_yaml_file
         )  # yaml_object will be a list or a dict
 
+    print(f"Config: {yaml_obj}")
     for test_config in yaml_obj["testConfig"]:
         config_type = test_config["type"]
         config_params = test_config["params"]
