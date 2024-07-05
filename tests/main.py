@@ -71,25 +71,18 @@ def run_test(test_type: str, config: PrometheusConfig):
         print(f"Test {test_type} failed, results of wrong format")
 
 
-def main(from_env=False):
-    if not from_env:
-        test_config_file_name = "config.yaml"
-        if not os.path.isfile(test_config_file_name):
-            print(
-                f"To run tests you must create a test config file called '{test_config_file_name}'.\n See 'test_config_example.yaml' for the format and examples"
-            )
-            return
-        with open(test_config_file_name, "r") as tests_yaml_file:
-            yaml_obj = yaml.safe_load(
-                tests_yaml_file
-            )  # yaml_object will be a list or a dict
-    else:
-        print(f"Getting config YAML from env variable TEST_CONFIG")
-        yaml_text = os.environ.get("TEST_CONFIG")
-        if not yaml_text:
-            print("To run tests inside Github workflow, you must define the TEST_CONFIG secret")
-            sys.exit(1)
-        yaml_obj = yaml.safe_load(yaml_text)
+def main(config_file="config.yaml"):
+    print(f"Using config file {config_file}")
+    if not os.path.isfile(config_file):
+        print(
+            "To run tests you must create a test config file.\n See 'test_config_example.yaml' for "
+            "the format and examples"
+        )
+        return
+    with open(config_file, "r") as tests_yaml_file:
+        yaml_obj = yaml.safe_load(
+            tests_yaml_file
+        )  # yaml_object will be a list or a dict
 
     for test_config in yaml_obj["testConfig"]:
         config_type = test_config["type"]
@@ -100,8 +93,6 @@ def main(from_env=False):
 
 if __name__ == "__main__":
     if len(sys.argv) == 2:
-        # Get configuration from Github secrets
-        main(from_env=True)
+        main(config_file=sys.argv[1])
     else:
-        # Get configuration from a local file
         main()

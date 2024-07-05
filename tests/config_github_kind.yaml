@@ -1,0 +1,9 @@
+testConfig:
+  - type: "PrometheusConfig"
+    params:
+      url:
+      disable_ssl:
+      headers:
+      prometheus_auth:
+      prometheus_url_query_string:
+      additional_labels:

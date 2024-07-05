@@ -34,6 +34,8 @@ jobs:
             kubectl get namespaces
             echo "=== PODS ==="
             kubectl get pods --all-namespaces
+            echo "=== PROMETHEUS NS ==="
+            kubectl get all --namespace prometheus
 
         # install Prometrix so that we can run tests on it
         - name: Install Prometrix
@@ -44,7 +46,5 @@ jobs:
 
         # run the actual tests
         - name: Test Prometrix
-          env:
-            TEST_CONFIG: ${{ secrets.TEST_CONFIG }}
           run: |
-            python tests/main.py --from-env
+            python tests/main.py tests/config_github_kind.yaml
