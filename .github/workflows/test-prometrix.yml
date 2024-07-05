@@ -33,6 +33,8 @@ jobs:
           kubectl get namespaces
           echo "=== PODS ==="
           kubectl get pods --all-namespaces
+          echo "=== SERVICES ==="
+          kubectl get services --all-namespaces
 
       - name: Install Prometrix
         run: |
@@ -45,9 +47,12 @@ jobs:
         with:
           workload: 'service/kind-prometheus-kube-prome-prometheus'
           mappings: 9090:9090
-          namespace: prometheus
+          options: '-n prometheus'
+
+      - name: Check tunnel to Prometheus
+        run: |
+          curl -s http://localhost:9090/api/v1/status/runtimeinfo
 
       - name: Run Prometrix tests
-#            kubectl port-forward -n prometheus service/kind-prometheus-kube-prome-prometheus 9090:9090
         run: |
           python tests/main.py tests/config_github_kind.yaml
