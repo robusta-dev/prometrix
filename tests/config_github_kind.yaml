@@ -1,9 +1,8 @@
 testConfig:
   - type: "PrometheusConfig"
     params:
-      url:
-      disable_ssl:
-      headers:
-      prometheus_auth:
-      prometheus_url_query_string:
-      additional_labels:
+      url: localhost:9090
+      # headers:
+      # prometheus_auth:
+      # prometheus_url_query_string:
+      # additional_labels:
