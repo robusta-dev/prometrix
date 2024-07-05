@@ -1,7 +1,7 @@
 testConfig:
   - type: "PrometheusConfig"
     params:
-      url: localhost:9090
+      url: http://localhost:9090
       # headers:
       # prometheus_auth:
       # prometheus_url_query_string:
