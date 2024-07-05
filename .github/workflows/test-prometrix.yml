@@ -19,6 +19,13 @@ jobs:
         # setup a KIND cluster with Prometheus
         - name: Create k8s Kind Cluster
           uses: helm/kind-action@v1.2.0
+        - name: Install Prometheus
+          run: |
+            helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+            helm repo add stable https://charts.helm.sh/stable
+            helm repo update
+            kubectl create namespace prometheus
+            helm install kind-prometheus prometheus-community/kube-prometheus-stack --namespace prometheus --set prometheus.service.nodePort=30000 --set prometheus.service.type=NodePort --set grafana.service.nodePort=31000 --set grafana.service.type=NodePort --set alertmanager.service.nodePort=32000 --set alertmanager.service.type=NodePort --set prometheus-node-exporter.service.nodePort=32001 --set prometheus-node-exporter.service.type=NodePort
         - name: Kind deployment diagnostics
           run: |
             echo "=== CONTEXTS ==="
@@ -27,7 +34,6 @@ jobs:
             kubectl get namespaces
             echo "=== PODS ==="
             kubectl get pods --all-namespaces
-        # TODO install Prometheus
 
         # install Prometrix so that we can run tests on it
         - name: Install Prometrix
