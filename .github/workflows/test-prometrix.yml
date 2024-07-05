@@ -1,0 +1,44 @@
+name: Test Prometrix
+
+on:
+  push:
+  workflow_dispatch:
+  pull_request:
+    types: [opened, reopened]
+
+jobs:
+    run_tests:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v2
+        - name: Set up Python
+          uses: actions/setup-python@v2
+          with:
+            python-version: 3.8
+
+        # setup a KIND cluster with Prometheus
+        - name: Create k8s Kind Cluster
+          uses: helm/kind-action@v1.2.0
+        - name: Kind deployment diagnostics
+          run: |
+            echo "=== CONTEXTS ==="
+            kubectl config get-contexts
+            echo "=== NAMESPACES ==="
+            kubectl get namespaces
+            echo "=== PODS ==="
+            kubectl get pods --all-namespaces
+        # TODO install Prometheus
+
+        # install Prometrix so that we can run tests on it
+        - name: Install Prometrix
+          run: |
+            curl -sSL https://install.python-poetry.org | python3 - --version 1.4.0
+            poetry config virtualenvs.create false
+            poetry install --with test
+
+        # run the actual tests
+        - name: Test Prometrix
+          env:
+            TEST_CONFIG: ${{ secrets.TEST_CONFIG }}
+          run: |
+            python tests/main.py --from-env
