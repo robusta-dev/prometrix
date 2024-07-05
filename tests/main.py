@@ -47,13 +47,13 @@ def check_result_not_empty(result: PrometheusQueryResult) -> bool:
     return False
 
 
-def run_test(test_type: str, config: PrometheusConfig):
+def run_test(test_type: str, config: PrometheusConfig) -> bool:
     try:
         prom_cli = get_custom_prometheus_connect(config)
         prom_cli.check_prometheus_connection()
         if not test_label(prom_cli):
             print(f"Test {test_type} failed, error with label api")
-            return
+            return False
         result = prom_cli.safe_custom_query_range(
             query="container_memory_working_set_bytes",
             start_time=datetime.now() - timedelta(days=1),
@@ -63,12 +63,15 @@ def run_test(test_type: str, config: PrometheusConfig):
         formatted_result = PrometheusQueryResult(data=result)
         if not check_result_not_empty(formatted_result):
             print(f"Test {test_type} failed, empty or invalid results")
-            return
+            return False
         print(f"Test {test_type} passed")
+        return True
     except PrometheusNotFound:
         print(f"Test {test_type} failed, could not connect to prometheus")
+        return False
     except ValidationError:
         print(f"Test {test_type} failed, results of wrong format")
+        return False
 
 
 def main(config_file="config.yaml"):
@@ -84,12 +87,16 @@ def main(config_file="config.yaml"):
             tests_yaml_file
         )  # yaml_object will be a list or a dict
 
-    print(f"Config: {yaml_obj}")
+    overall_test_result = True
+
     for test_config in yaml_obj["testConfig"]:
         config_type = test_config["type"]
         config_params = test_config["params"]
         config = generate_prometheus_config(config_type, config_params)
-        run_test(config_type, config)
+        result = run_test(config_type, config)
+        overall_test_result = overall_test_result and result
+
+    sys.exit(0 if overall_test_result else 1)
 
 
 if __name__ == "__main__":
