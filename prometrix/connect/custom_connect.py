@@ -134,7 +134,7 @@ class CustomPrometheusConnect(PrometheusConnect):
                 f"Couldn't connect to the url: {self.url}\n\t\t{service_name}: {e}"
             )
     
-    def fetch_prometheus_labels(self):
+    def fetch_prometheus_label_names(self) -> List:
         try:
             response = self._session.get(
                 f"{self.url}/api/v1/labels",
@@ -143,7 +143,7 @@ class CustomPrometheusConnect(PrometheusConnect):
                 params={},
             )
             response.raise_for_status()
-            return response.json().get("data", {})
+            return response.json().get("data", [])
         except Exception as e:
             raise PrometheusNotFound(
                 f"Couldn't connect to Prometheus found under {self.url}\nCaused by {e.__class__.__name__}: {e})"
