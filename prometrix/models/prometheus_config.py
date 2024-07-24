@@ -25,6 +25,8 @@ class PrometheusConfig(BaseModel):
         PrometheusApis.LABELS,
         PrometheusApis.FLAGS,
     ]
+    query_step: str = "5m"
+    query_interval: str = "1d"
 
 
 class AWSPrometheusConfig(PrometheusConfig):
