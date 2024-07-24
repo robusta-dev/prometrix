@@ -128,7 +128,7 @@ Releasing
 ----------
 
 To release a new version, bump the version number in pyproject.toml and run:
-
+XXXXX
 ```
 poetry publish --build --username=<username> --password=<password>
 ```
