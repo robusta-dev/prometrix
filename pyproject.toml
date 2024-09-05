@@ -19,8 +19,10 @@ prometheus-api-client = "^0.5.3"
 pillow = "^10.3.0" # added to Pin transitive dependency, not needed directly
 fonttools = "^4.43.0" # added to Pin transitive dependency, not needed directly
 urllib3 = "^1.26.18" # added to Pin transitive dependency, not needed directly
+zipp = "^3.20.1" # added to Pin transitive dependency, not needed directly
 idna = "^3.7"
 requests = "^2.32.0"
+
 
 [tool.poetry.group.test]
 optional = true
