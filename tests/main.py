@@ -43,7 +43,7 @@ def check_result_not_empty(result: PrometheusQueryResult) -> bool:
         )
         return False
     for series in result.series_list_result:
-        if len(series.values) > 1 and len(series.timestamps) > 1:
+        if len(series["values"]) > 1 and len(series["timestamps"]) > 1:
             return True
     return False
 

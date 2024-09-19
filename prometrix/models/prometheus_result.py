@@ -41,6 +41,7 @@ class PrometheusSeries:
             "values": self.values
         }
 
+
 class PrometheusQueryResult:
     def __init__(self, data: Dict):
         result = data.get("result", None)
@@ -85,12 +86,14 @@ class PrometheusQueryResult:
             for series_item in series
         ]
 
-    def to_json(self):
-        """ Return the result as a JSON-compatible dictionary """
-        return json.dumps({
-            "result_type": self.result_type,
-            "vector_result": self.vector_result,
-            "series_list_result": self.series_list_result,
-            "scalar_result": self.scalar_result,
-            "string_result": self.string_result
-        }, indent=4)
+    def __iter__(self):
+        """ Allows the object to be converted directly to a dictionary using dict() """
+        yield 'result_type', self.result_type
+        yield 'vector_result', self.vector_result
+        yield 'series_list_result', self.series_list_result
+        yield 'scalar_result', self.scalar_result
+        yield 'string_result', self.string_result
+
+    def __repr__(self):
+        """ Provides a string representation of the object as a dictionary """
+        return str(dict(self))
