@@ -59,17 +59,17 @@ class PrometheusQueryResult:
         self.string_result = None
 
         if result_type == "string" or result_type == "error":
-            self.string_result = str(result)
+            self.string_result: str = str(result)
         elif result_type == "scalar" and isinstance(result, list):
-            self.scalar_result = PrometheusScalarValue(result).to_dict()
+            self.scalar_result: Dict[str, any] = PrometheusScalarValue(result).to_dict()
         elif result_type == "vector" and isinstance(result, list):
-            self.vector_result = self._format_vector(result)
+            self.vector_result: List[Dict[str, any]] = self._format_vector(result)
         elif result_type == "matrix" and isinstance(result, list):
-            self.series_list_result = self._format_series(result)
+            self.series_list_result: List[Dict[str, any]] = self._format_series(result)
         else:
             raise ValueError("result or returnType is invalid")
 
-    def _format_vector(self, vector: List):
+    def _format_vector(self, vector: List) -> List[Dict[str, any]]:
         """ Convert vector result into a list of dictionaries for JSON """
         return [
             {
@@ -79,7 +79,7 @@ class PrometheusQueryResult:
             for vector_item in vector
         ]
 
-    def _format_series(self, series: List):
+    def _format_series(self, series: List) -> List[Dict[str, any]]:
         """ Convert matrix (series) result into a list of PrometheusSeries dictionaries for JSON """
         return [
             PrometheusSeries(series_item["metric"], series_item["values"]).to_dict()
