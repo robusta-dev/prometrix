@@ -915,13 +915,13 @@ xmp = ["defusedxml"]
 
 [[package]]
 name = "prometheus-api-client"
-version = "0.5.5"
+version = "0.5.3"
 description = "A small python api to collect data from prometheus"
 optional = false
 python-versions = "*"
 files = [
-    {file = "prometheus-api-client-0.5.5.tar.gz", hash = "sha256:59449c4be0485ea5a2dfbbed2482eb0a3eeac8c131b3efc866df4c9a0c403bb7"},
-    {file = "prometheus_api_client-0.5.5-py3-none-any.whl", hash = "sha256:e65ad16c262da15ed2d2288b521a80278feed2d31e7f0e732a935b67af8e24b4"},
+    {file = "prometheus-api-client-0.5.3.tar.gz", hash = "sha256:9b2c293c202072e5cf67199a9cc41d5eb32f02dd8cc23c5847b603cd9ce99bcf"},
+    {file = "prometheus_api_client-0.5.3-py3-none-any.whl", hash = "sha256:be11619748f92e63d634e18908779dc0e29a4d4e57de7a1e6b1729fcc6cd5617"},
 ]
 
 [package.dependencies]
@@ -1398,4 +1398,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "e1c1074886964a053d87609d7040678c4be1a0aaa1cea3665130770a3ea08623"
+content-hash = "f4c6d1b4753be3c0824ac2d1cb7c3a1c5ba78d94b30b44f10b07fb38e4efa613"
