@@ -37,6 +37,7 @@ def get_custom_prometheus_connect(
             service_name=prom_config.service_name,
             region=prom_config.aws_region,
             config=prom_config,
+            token=prom_config.token,
         )
     else:
         prom = CustomPrometheusConnect(config=prom_config)

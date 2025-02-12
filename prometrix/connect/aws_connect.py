@@ -12,10 +12,10 @@ from prometrix.connect.custom_connect import CustomPrometheusConnect
 
 class AWSPrometheusConnect(CustomPrometheusConnect):
     def __init__(
-        self, access_key: str, secret_key: str, region: str, service_name: str, **kwargs
+        self, access_key: str, secret_key: str, region: str, service_name: str, token: Optional[str] = None, **kwargs
     ):
         super().__init__(**kwargs)
-        self._credentials = Credentials(access_key, secret_key)
+        self._credentials = Credentials(access_key, secret_key, token)
         self._sigv4auth = S3SigV4Auth(self._credentials, service_name, region)
 
     def signed_request(
