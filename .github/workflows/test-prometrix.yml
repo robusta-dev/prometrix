@@ -1,0 +1,59 @@
+name: Test Prometrix
+
+on:
+  push:
+  workflow_dispatch:
+  pull_request:
+    types: [opened, reopened]
+
+jobs:
+  run_tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Create k8s Kind Cluster
+        uses: helm/kind-action@v1.2.0
+      - name: Install Prometheus
+        run: |
+          helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+          helm repo add stable https://charts.helm.sh/stable
+          helm repo update
+          kubectl create namespace prometheus
+          helm install kind-prometheus prometheus-community/kube-prometheus-stack --namespace prometheus --set prometheus.service.nodePort=30000 --set prometheus.service.type=NodePort --set grafana.service.nodePort=31000 --set grafana.service.type=NodePort --set alertmanager.service.nodePort=32000 --set alertmanager.service.type=NodePort --set prometheus-node-exporter.service.nodePort=32001 --set prometheus-node-exporter.service.type=NodePort
+      - name: Kind deployment diagnostics
+        run: |
+          echo "=== CONTEXTS ==="
+          kubectl config get-contexts
+          echo "=== NAMESPACES ==="
+          kubectl get namespaces
+          echo "=== PODS ==="
+          kubectl get pods --all-namespaces
+          echo "=== SERVICES ==="
+          kubectl get services --all-namespaces
+
+      - name: Install Prometrix
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 - --version 1.4.0
+          poetry config virtualenvs.create false
+          poetry install --with test
+
+      - name: Setup Prometrix <-> Github runner tunnel
+        uses: vbem/k8s-port-forward@v1
+        with:
+          workload: 'service/kind-prometheus-kube-prome-prometheus'
+          mappings: 9090:9090
+          options: '-n prometheus'
+
+      - name: Check tunnel to Prometheus
+        run: |
+          curl -s http://localhost:9090/api/v1/status/runtimeinfo
+
+      - name: Run Prometrix tests
+        run: |
+          sleep 10
+          python tests/main.py tests/config_github_kind.yaml

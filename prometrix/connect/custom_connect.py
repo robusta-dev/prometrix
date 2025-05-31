@@ -22,7 +22,7 @@ class CustomPrometheusConnect(PrometheusConnect):
         self._session = requests.Session()
         self._session.mount(self.url, HTTPAdapter(pool_maxsize=10, pool_block=True))
 
-    def custom_query_range(
+    def safe_custom_query_range(
         self,
         query: str,
         start_time: datetime,
@@ -81,7 +81,7 @@ class CustomPrometheusConnect(PrometheusConnect):
             raise PrometheusApiClientException("Labels Api not supported")
         return super().get_label_values(label_name, params)
 
-    def custom_query(self, query: str, params: dict = None):
+    def safe_custom_query(self, query: str, params: dict = None):
         response = self._custom_query(query, params)
         if response.status_code == 200:
             data = response.json()["data"]
