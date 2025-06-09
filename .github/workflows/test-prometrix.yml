@@ -18,7 +18,9 @@ jobs:
 
       - name: Create k8s Kind Cluster
         uses: helm/kind-action@v1.2.0
-      - name: Install Prometheus
+        with:
+          node_image: kindest/node:v1.25.11
+      - name: Install Prometheus  
         run: |
           helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
           helm repo add stable https://charts.helm.sh/stable
