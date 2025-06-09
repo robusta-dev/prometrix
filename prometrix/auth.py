@@ -38,7 +38,7 @@ class PrometheusAuthorization:
             headers={
                 "Metadata": "true",
             },
-            data={
+            params={
                 "api-version": "2018-02-01",
                 "client_id": config.azure_client_id,
                 "resource": config.azure_resource,
