@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "prometrix"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Avi Kotlicky <avi@robusta.dev>"]
 readme = "README.md"
 packages = [{include = "prometrix"}]
