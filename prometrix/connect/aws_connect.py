@@ -14,8 +14,8 @@ from prometrix.connect.custom_connect import CustomPrometheusConnect
 class AWSPrometheusConnect(CustomPrometheusConnect):
     def __init__(
         self,
-        access_key: str,
-        secret_key: str,
+        access_key: Optional[str],
+        secret_key: Optional[str],
         region: str,
         service_name: str,
         token: Optional[str] = None,
