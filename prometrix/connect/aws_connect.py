@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Any, Dict, Optional, List
 
 import requests
+import boto3
 from botocore.auth import S3SigV4Auth
 from botocore.awsrequest import AWSRequest
 from botocore.credentials import Credentials
@@ -12,19 +13,40 @@ from prometrix.connect.custom_connect import CustomPrometheusConnect
 
 class AWSPrometheusConnect(CustomPrometheusConnect):
     def __init__(
-        self, access_key: str, secret_key: str, region: str, service_name: str, token: Optional[str] = None, **kwargs
+        self,
+        access_key: Optional[str],
+        secret_key: Optional[str],
+        region: str,
+        service_name: str,
+        token: Optional[str] = None,
+        **kwargs,
     ):
         super().__init__(**kwargs)
-        self._credentials = Credentials(access_key, secret_key, token)
-        self._sigv4auth = S3SigV4Auth(self._credentials, service_name, region)
+        self.region = region
+        self.service_name = service_name
+
+        if access_key and secret_key:
+            # Backwards compatibility: use static keys
+            self._credentials = Credentials(access_key, secret_key, token)
+        else:
+            # IRSA
+            session = boto3.Session()
+            creds = session.get_credentials()
+            if not creds:
+                raise RuntimeError("No AWS credentials found (neither static keys nor IRSA)")
+            self._credentials = creds
+
+    def _build_auth(self) -> S3SigV4Auth:
+        """Builds fresh SigV4 auth with current credentials (handles rotation)."""
+        frozen = self._credentials.get_frozen_credentials()
+        return S3SigV4Auth(frozen, self.service_name, self.region)
 
     def signed_request(
         self, method, url, data=None, params=None, verify=False, headers=None
     ):
-        request = AWSRequest(
-            method=method, url=url, data=data, params=params, headers=headers
-        )
-        self._sigv4auth.add_auth(request)
+        request = AWSRequest(method=method, url=url, data=data, params=params, headers=headers)
+        auth = self._build_auth()
+        auth.add_auth(request)
         return requests.request(
             method=method,
             url=url,
