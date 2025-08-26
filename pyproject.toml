@@ -1,12 +1,12 @@
 [tool.poetry]
 name = "prometrix"
-version = "0.2.1"
+version = "0.2.2"
 authors = ["Avi Kotlicky <avi@robusta.dev>"]
 readme = "README.md"
 packages = [{include = "prometrix"}]
 description = "A Python Prometheus client for all Prometheus instances."
 
-[project.urls]
+[tool.poetry.urls]
 "Homepage" = "https://github.com/robusta-dev/prometrix"
 "Bug Tracker" = "https://github.com/robusta-dev/prometrix/issues"
 

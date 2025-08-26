@@ -30,8 +30,8 @@ class PrometheusConfig(BaseModel):
 
 
 class AWSPrometheusConfig(PrometheusConfig):
-    access_key: str
-    secret_access_key: str
+    access_key: Optional[str] = None
+    secret_access_key: Optional[str] = None
     token: Optional[str] = None
     service_name: str = "aps"
     aws_region: str
