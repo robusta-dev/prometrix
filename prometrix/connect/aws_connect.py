@@ -21,10 +21,6 @@ class AWSPrometheusConnect(CustomPrometheusConnect):
         token: Optional[str] = None,
         **kwargs,
     ):
-        """
-        AMP connector using S3SigV4Auth.
-        Supports both static AWS keys (for backwards compatibility) and IRSA.
-        """
         super().__init__(**kwargs)
         self.region = region
         self.service_name = service_name
@@ -33,7 +29,7 @@ class AWSPrometheusConnect(CustomPrometheusConnect):
             # Backwards compatibility: use static keys
             self._credentials = Credentials(access_key, secret_key, token)
         else:
-            # Preferred: IRSA or any AWS provider chain
+            # IRSA
             session = boto3.Session()
             creds = session.get_credentials()
             if not creds:
