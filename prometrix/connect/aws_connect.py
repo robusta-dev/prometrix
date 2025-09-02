@@ -1,6 +1,7 @@
 import os
 from datetime import datetime
 from typing import Any, Dict, Optional
+import logging
 
 import requests
 import boto3
@@ -60,9 +61,20 @@ class AWSPrometheusConnect(CustomPrometheusConnect):
                 RoleSessionName="amp-auto",
                 WebIdentityToken=web_identity_token,
             )
-            c = resp["Credentials"]
+            
+            credentials = resp.get("Credentials")
+            if not credentials:
+                logging.error("Invalid assume role response {resp}")
+                return
+
+            required_fields = ["AccessKeyId", "SecretAccessKey", "SessionToken"]
+            missing = [f for f in required_fields if not credentials.get(f)]
+            if missing:
+                logging.error("Missing required credential fields: {missing}. Raw response: {resp}")
+                raise Exception(f"Failed to assume role: missing fields {missing}")
+
             self._credentials = Credentials(
-                c["AccessKeyId"], c["SecretAccessKey"], c["SessionToken"]
+                credentials["AccessKeyId"],credentials["SecretAccessKey"], credentials["SessionToken"]
             )
         except (ClientError, BotoCoreError, Exception) as e:
             raise Exception(
