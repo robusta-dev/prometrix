@@ -8,6 +8,7 @@ from botocore.auth import S3SigV4Auth
 from botocore.awsrequest import AWSRequest
 from botocore.credentials import Credentials
 from prometheus_api_client import PrometheusApiClientException
+from botocore.exceptions import BotoCoreError, ClientError
 
 from prometrix.connect.custom_connect import CustomPrometheusConnect
 
@@ -52,14 +53,21 @@ class AWSPrometheusConnect(CustomPrometheusConnect):
         except FileNotFoundError:
             raise RuntimeError(f"Service Account token not found at {SA_TOKEN_PATH}")
 
-        sts = boto3.client("sts", region_name=self.region)
-        resp = sts.assume_role_with_web_identity(
-            RoleArn=role_arn,
-            RoleSessionName="amp-auto",
-            WebIdentityToken=web_identity_token,
-        )
-        c = resp["Credentials"]
-        self._credentials = Credentials(c["AccessKeyId"], c["SecretAccessKey"], c["SessionToken"])
+        try:
+            sts = boto3.client("sts", region_name=self.region)
+            resp = sts.assume_role_with_web_identity(
+                RoleArn=role_arn,
+                RoleSessionName="amp-auto",
+                WebIdentityToken=web_identity_token,
+            )
+            c = resp["Credentials"]
+            self._credentials = Credentials(
+                c["AccessKeyId"], c["SecretAccessKey"], c["SessionToken"]
+            )
+        except (ClientError, BotoCoreError, Exception) as e:
+            raise Exception(
+                f"Failed to assume role {role_arn} with web identity: {str(e)}"
+            )
 
     def _build_auth(self) -> S3SigV4Auth:
         """Builds fresh SigV4 auth with current credentials (handles rotation)."""
