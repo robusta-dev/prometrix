@@ -35,6 +35,7 @@ class AWSPrometheusConfig(PrometheusConfig):
     token: Optional[str] = None
     service_name: str = "aps"
     aws_region: str
+    assume_role_arn: Optional[str] = None
     supported_apis: List[PrometheusApis] = [
         PrometheusApis.QUERY,
         PrometheusApis.QUERY_RANGE,
