@@ -1,5 +1,6 @@
+import os
 from datetime import datetime
-from typing import Any, Dict, Optional, List
+from typing import Any, Dict, Optional
 
 import requests
 import boto3
@@ -10,6 +11,8 @@ from prometheus_api_client import PrometheusApiClientException
 
 from prometrix.connect.custom_connect import CustomPrometheusConnect
 
+SA_TOKEN_PATH = os.environ.get("SA_TOKEN_PATH", "/var/run/secrets/eks.amazonaws.com/serviceaccount/token")
+AWS_ASSUME_ROLE = os.environ.get("AWS_ASSUME_ROLE")
 
 class AWSPrometheusConnect(CustomPrometheusConnect):
     def __init__(
@@ -19,6 +22,7 @@ class AWSPrometheusConnect(CustomPrometheusConnect):
         region: str,
         service_name: str,
         token: Optional[str] = None,
+        assume_role_arn: Optional[str] = None,
         **kwargs,
     ):
         super().__init__(**kwargs)
@@ -35,6 +39,27 @@ class AWSPrometheusConnect(CustomPrometheusConnect):
             if not creds:
                 raise RuntimeError("No AWS credentials found (neither static keys nor IRSA)")
             self._credentials = creds
+
+        role_to_assume = assume_role_arn or AWS_ASSUME_ROLE
+        if role_to_assume:
+            self._assume_role_with_web_identity(role_to_assume)
+
+    def _assume_role_with_web_identity(self, role_arn: str) -> None:
+        """Assume the given role using the pod's service-account web identity token."""
+        try:
+            with open(SA_TOKEN_PATH, "r", encoding="utf-8") as f:
+                web_identity_token = f.read().strip()
+        except FileNotFoundError:
+            raise RuntimeError(f"Service Account token not found at {SA_TOKEN_PATH}")
+
+        sts = boto3.client("sts", region_name=self.region)
+        resp = sts.assume_role_with_web_identity(
+            RoleArn=role_arn,
+            RoleSessionName="amp-auto",
+            WebIdentityToken=web_identity_token,
+        )
+        c = resp["Credentials"]
+        self._credentials = Credentials(c["AccessKeyId"], c["SecretAccessKey"], c["SessionToken"])
 
     def _build_auth(self) -> S3SigV4Auth:
         """Builds fresh SigV4 auth with current credentials (handles rotation)."""
