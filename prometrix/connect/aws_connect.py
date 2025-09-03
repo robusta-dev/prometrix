@@ -61,7 +61,7 @@ class AWSPrometheusConnect(CustomPrometheusConnect):
                 RoleSessionName="amp-auto",
                 WebIdentityToken=web_identity_token,
             )
-            
+
             credentials = resp.get("Credentials")
             if not credentials:
                 logging.error("Invalid assume role response {resp}")
@@ -98,6 +98,7 @@ class AWSPrometheusConnect(CustomPrometheusConnect):
             headers=dict(request.headers),
             verify=verify,
             data=data,
+            params=params,
         )
 
     def _custom_query(self, query: str, params: dict = None):

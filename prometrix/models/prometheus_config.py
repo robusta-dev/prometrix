@@ -1,7 +1,12 @@
 from enum import Enum
 from typing import Dict, List, Optional
 
-from pydantic import BaseModel, SecretStr
+try:
+    # Works if Pydantic v2 is installed
+    from pydantic.v1 import BaseModel, SecretStr
+except ImportError:
+    # Fallback if running under Pydantic v1
+    from pydantic import BaseModel, SecretStr
 
 
 class PrometheusApis(Enum):

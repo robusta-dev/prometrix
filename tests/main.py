@@ -5,7 +5,12 @@ from typing import Dict
 
 import yaml
 from prometheus_api_client import PrometheusApiClientException
-from pydantic import ValidationError
+
+try:
+    from pydantic.v1 import ValidationError
+except ImportError:
+    from pydantic import ValidationError
+
 from pytimeparse.timeparse import timeparse
 
 from prometrix import (AWSPrometheusConfig, AzurePrometheusConfig,
