@@ -36,6 +36,7 @@ def get_custom_prometheus_connect(
             secret_key=prom_config.secret_access_key,
             service_name=prom_config.service_name,
             region=prom_config.aws_region,
+            assume_role_arn=prom_config.assume_role_arn,
             config=prom_config,
             token=prom_config.token,
         )
