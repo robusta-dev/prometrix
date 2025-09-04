@@ -5,7 +5,7 @@ import logging
 
 import requests
 import boto3
-from botocore.auth import S3SigV4Auth
+from botocore.auth import SigV4Auth
 from botocore.awsrequest import AWSRequest
 from botocore.credentials import Credentials
 from prometheus_api_client import PrometheusApiClientException
@@ -44,31 +44,25 @@ class AWSPrometheusConnect(CustomPrometheusConnect):
 
         role_to_assume = assume_role_arn or AWS_ASSUME_ROLE
         if role_to_assume:
-            self._assume_role_with_web_identity(role_to_assume)
+            self._assume_role(role_to_assume)
 
-    def _assume_role_with_web_identity(self, role_arn: str) -> None:
-        """Assume the given role using the pod's service-account web identity token."""
+    def _assume_role(self, role_arn: str) -> None:
         try:
-            with open(SA_TOKEN_PATH, "r", encoding="utf-8") as f:
-                web_identity_token = f.read().strip()
-        except FileNotFoundError:
-            raise RuntimeError(f"Service Account token not found at {SA_TOKEN_PATH}")
-
-        try:
-            sts = boto3.client("sts", region_name=self.region)
-            resp = sts.assume_role_with_web_identity(
-                RoleArn=role_arn,
-                RoleSessionName="amp-auto",
-                WebIdentityToken=web_identity_token,
+            frozen = self._credentials.get_frozen_credentials()
+            sts = boto3.client(
+                "sts",
+                region_name=self.region,
+                aws_access_key_id=frozen.access_key,
+                aws_secret_access_key=frozen.secret_key,
+                aws_session_token=frozen.token,
             )
-
+            resp = sts.assume_role(RoleArn=role_arn, RoleSessionName="amp-auto")
             credentials = resp.get("Credentials")
             if not credentials:
-                logging.error("Invalid assume role response {resp}")
+                logging.error("Invalid assume role response %s", resp)
                 return
-
-            required_fields = ["AccessKeyId", "SecretAccessKey", "SessionToken"]
-            missing = [f for f in required_fields if not credentials.get(f)]
+            required = ["AccessKeyId", "SecretAccessKey", "SessionToken"]
+            missing = [f for f in required if not credentials.get(f)]
             if missing:
                 logging.error("Missing required credential fields: {missing}. Raw response: {resp}")
                 raise Exception(f"Failed to assume role: missing fields {missing}")
@@ -77,14 +71,12 @@ class AWSPrometheusConnect(CustomPrometheusConnect):
                 credentials["AccessKeyId"],credentials["SecretAccessKey"], credentials["SessionToken"]
             )
         except (ClientError, BotoCoreError, Exception) as e:
-            raise Exception(
-                f"Failed to assume role {role_arn} with web identity: {str(e)}"
-            )
+            raise Exception(f"Failed to assume role {role_arn}: {str(e)}")
 
-    def _build_auth(self) -> S3SigV4Auth:
+    def _build_auth(self) -> SigV4Auth:
         """Builds fresh SigV4 auth with current credentials (handles rotation)."""
         frozen = self._credentials.get_frozen_credentials()
-        return S3SigV4Auth(frozen, self.service_name, self.region)
+        return SigV4Auth(frozen, self.service_name, self.region)
 
     def signed_request(
         self, method, url, data=None, params=None, verify=False, headers=None
