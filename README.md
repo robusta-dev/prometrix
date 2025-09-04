@@ -25,6 +25,10 @@ You can install the package using pip:
 pip install prometrix
 ```
 
+
+> **⚠️ Note:** For Python **3.8 support**, you must use version **0.2.3 or below** of `prometrix`.  
+> From `0.2.4` onward, `prometrix` requires **Python ≥ 3.9**.
+
 Usage
 -----
 
