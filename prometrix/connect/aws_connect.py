@@ -8,7 +8,6 @@ import boto3
 from botocore.auth import SigV4Auth
 from botocore.awsrequest import AWSRequest
 from botocore.credentials import Credentials
-from prometheus_api_client import PrometheusApiClientException
 from botocore.exceptions import BotoCoreError, ClientError
 
 from prometrix.connect.custom_connect import CustomPrometheusConnect
@@ -165,7 +164,7 @@ class AWSPrometheusConnect(CustomPrometheusConnect):
         if response.status_code == 200:
             return response.json()["data"]
         else:
-            raise PrometheusApiClientException(
+            raise Exception(
                 "HTTP Status Code {} ({!r})".format(
                     response.status_code, response.content
                 )
@@ -183,7 +182,7 @@ class AWSPrometheusConnect(CustomPrometheusConnect):
         if response.status_code == 200:
             return response.json()["data"]
         else:
-            raise PrometheusApiClientException(
+            raise Exception(
                 "HTTP Status Code {} ({!r})".format(
                     response.status_code, response.content
                 )
