@@ -125,7 +125,7 @@ class AWSPrometheusConnect(CustomPrometheusConnect):
             verify=verify,
             headers=headers,
         )
-        if resp is not None and resp.status_code == 403:
+        if resp is not None and resp.status_code in (400, 401, 403):
             self._refresh_credentials()
             resp = self.signed_request(
                 method=method,
