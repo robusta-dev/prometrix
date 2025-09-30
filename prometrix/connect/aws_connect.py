@@ -116,6 +116,27 @@ class AWSPrometheusConnect(CustomPrometheusConnect):
             except Exception:
                 logging.exception("Failed to refresh assume role")
 
+    def _request_with_refresh(self, *, method, url, data=None, params=None, headers=None, verify=False):
+        resp = self.signed_request(
+            method=method,
+            url=url,
+            data=data,
+            params=params,
+            verify=verify,
+            headers=headers,
+        )
+        if resp is not None and resp.status_code == 403:
+            self._refresh_credentials()
+            resp = self.signed_request(
+                method=method,
+                url=url,
+                data=data,
+                params=params,
+                verify=verify,
+                headers=headers,
+            )
+        return resp
+
     def _custom_query(self, query: str, params: dict = None):
         """
         Send a custom query to a Prometheus Host.
@@ -136,7 +157,7 @@ class AWSPrometheusConnect(CustomPrometheusConnect):
         data = None
         query = str(query)
         # using the query API to get raw data
-        response = self.signed_request(
+        response = self._request_with_refresh(
             method="POST",
             url="{0}/api/v1/query".format(self.url),
             data={**{"query": query}, **params},
@@ -144,16 +165,6 @@ class AWSPrometheusConnect(CustomPrometheusConnect):
             verify=self.ssl_verification,
             headers=self.headers,
         )
-        if response is not None and response.status_code == 403:
-            self._refresh_credentials()
-            response = self.signed_request(
-                method="POST",
-                url="{0}/api/v1/query".format(self.url),
-                data={**{"query": query}, **params},
-                params={},
-                verify=self.ssl_verification,
-                headers=self.headers,
-            )
         return response
 
     def safe_custom_query_range(
@@ -185,7 +196,7 @@ class AWSPrometheusConnect(CustomPrometheusConnect):
         params = params or {}
 
         query = str(query)
-        response = self.signed_request(
+        response = self._request_with_refresh(
             method="POST",
             url="{0}/api/v1/query_range".format(self.url),
             data={
@@ -195,18 +206,6 @@ class AWSPrometheusConnect(CustomPrometheusConnect):
             params={},
             headers=self.headers,
         )
-        if response is not None and response.status_code == 403:
-            self._refresh_credentials()
-            response = self.signed_request(
-                method="POST",
-                url="{0}/api/v1/query_range".format(self.url),
-                data={
-                    **{"query": query, "start": start, "end": end, "step": step},
-                    **params,
-                },
-                params={},
-                headers=self.headers,
-            )
         if response.status_code == 200:
             return response.json()["data"]
         else:
