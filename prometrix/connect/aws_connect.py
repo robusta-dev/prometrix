@@ -34,6 +34,8 @@ class AWSPrometheusConnect(CustomPrometheusConnect):
         if access_key and secret_key:
             # Backwards compatibility: use static keys
             self._credentials = Credentials(access_key, secret_key, token)
+            self._has_static_keys = True
+            self._session = None
         else:
             # IRSA
             session = boto3.Session()
@@ -41,8 +43,11 @@ class AWSPrometheusConnect(CustomPrometheusConnect):
             if not creds:
                 raise RuntimeError("No AWS credentials found (neither static keys nor IRSA)")
             self._credentials = creds
+            self._has_static_keys = False
+            self._session = session
 
         role_to_assume = assume_role_arn or AWS_ASSUME_ROLE
+        self._role_to_assume = role_to_assume
         if role_to_assume:
             self._assume_role(role_to_assume)
 
@@ -93,6 +98,45 @@ class AWSPrometheusConnect(CustomPrometheusConnect):
             params=params,
         )
 
+    def _refresh_credentials(self) -> None:
+        """
+            Boto should automatically refresh expired credentials but when assuming role it cant be done automatically
+        """
+        try:
+            if not self._has_static_keys and self._session is not None:
+                # this is also needed for assume role if base credentials fails
+                refreshed = self._session.get_credentials()
+                if refreshed:
+                    self._credentials = refreshed
+        except Exception:
+            logging.exception("Failed to refresh session credentials")
+        if self._role_to_assume:
+            try:
+                self._assume_role(self._role_to_assume)
+            except Exception:
+                logging.exception("Failed to refresh assume role")
+
+    def _request_with_refresh(self, *, method, url, data=None, params=None, headers=None, verify=False):
+        resp = self.signed_request(
+            method=method,
+            url=url,
+            data=data,
+            params=params,
+            verify=verify,
+            headers=headers,
+        )
+        if resp is not None and resp.status_code in (400, 401, 403):
+            self._refresh_credentials()
+            resp = self.signed_request(
+                method=method,
+                url=url,
+                data=data,
+                params=params,
+                verify=verify,
+                headers=headers,
+            )
+        return resp
+
     def _custom_query(self, query: str, params: dict = None):
         """
         Send a custom query to a Prometheus Host.
@@ -113,7 +157,7 @@ class AWSPrometheusConnect(CustomPrometheusConnect):
         data = None
         query = str(query)
         # using the query API to get raw data
-        response = self.signed_request(
+        response = self._request_with_refresh(
             method="POST",
             url="{0}/api/v1/query".format(self.url),
             data={**{"query": query}, **params},
@@ -152,7 +196,7 @@ class AWSPrometheusConnect(CustomPrometheusConnect):
         params = params or {}
 
         query = str(query)
-        response = self.signed_request(
+        response = self._request_with_refresh(
             method="POST",
             url="{0}/api/v1/query_range".format(self.url),
             data={
