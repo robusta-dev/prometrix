@@ -15,6 +15,7 @@ from prometrix.connect.custom_connect import CustomPrometheusConnect
 
 SA_TOKEN_PATH = os.environ.get("SA_TOKEN_PATH", "/var/run/secrets/eks.amazonaws.com/serviceaccount/token")
 AWS_ASSUME_ROLE = os.environ.get("AWS_ASSUME_ROLE")
+AWS_REFRESH_CREDS_SEC = int(os.environ.get("AWS_REFRESH_CREDS_SEC", "900")) # 15 minutes
 
 class AWSPrometheusConnect(CustomPrometheusConnect):
     def __init__(
@@ -99,7 +100,7 @@ class AWSPrometheusConnect(CustomPrometheusConnect):
     def _build_auth(self) -> SigV4Auth:
         """Builds fresh SigV4 auth with current credentials (handles rotation)."""
         try:
-            if self._last_init_at is None or (datetime.utcnow() - self._last_init_at).total_seconds() >= 900:
+            if self._last_init_at is None or (datetime.utcnow() - self._last_init_at).total_seconds() >= AWS_REFRESH_CREDS_SEC:
                 logging.debug("Fifteen minutes passed; re-initializing AWS credentials")
                 self.init_credentials()
         except Exception:
