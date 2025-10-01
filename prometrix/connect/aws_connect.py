@@ -101,7 +101,7 @@ class AWSPrometheusConnect(CustomPrometheusConnect):
         """Builds fresh SigV4 auth with current credentials (handles rotation)."""
         try:
             if self._last_init_at is None or (datetime.utcnow() - self._last_init_at).total_seconds() >= AWS_REFRESH_CREDS_SEC:
-                logging.debug("Fifteen minutes passed; re-initializing AWS credentials")
+                logging.debug("%d seconds passed; re-initializing AWS credentials", AWS_REFRESH_CREDS_SEC)
                 self.init_credentials()
         except Exception:
             logging.exception("Time-based credential refresh failed")
@@ -122,24 +122,6 @@ class AWSPrometheusConnect(CustomPrometheusConnect):
             data=data,
             params=params,
         )
-
-    def _refresh_credentials(self) -> None:
-        """
-            Boto should automatically refresh expired credentials but when assuming role it cant be done automatically
-        """
-        try:
-            if not self._has_static_keys and self._session is not None:
-                # this is also needed for assume role if base credentials fails
-                refreshed = self._session.get_credentials()
-                if refreshed:
-                    self._credentials = refreshed
-        except Exception:
-            logging.exception("Failed to refresh session credentials")
-        if self._role_to_assume:
-            try:
-                self._assume_role(self._role_to_assume)
-            except Exception:
-                logging.exception("Failed to refresh assume role")
 
     def _request_with_refresh(self, *, method, url, data=None, params=None, headers=None, verify=False):
         resp = self.signed_request(
