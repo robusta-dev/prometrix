@@ -15,6 +15,7 @@ from prometrix.connect.custom_connect import CustomPrometheusConnect
 
 SA_TOKEN_PATH = os.environ.get("SA_TOKEN_PATH", "/var/run/secrets/eks.amazonaws.com/serviceaccount/token")
 AWS_ASSUME_ROLE = os.environ.get("AWS_ASSUME_ROLE")
+AWS_REFRESH_CREDS_SEC = int(os.environ.get("AWS_REFRESH_CREDS_SEC", "900")) # 15 minutes
 
 class AWSPrometheusConnect(CustomPrometheusConnect):
     def __init__(
@@ -31,25 +32,43 @@ class AWSPrometheusConnect(CustomPrometheusConnect):
         self.region = region
         self.service_name = service_name
 
-        if access_key and secret_key:
-            # Backwards compatibility: use static keys
-            self._credentials = Credentials(access_key, secret_key, token)
-            self._has_static_keys = True
-            self._session = None
-        else:
-            # IRSA
-            session = boto3.Session()
-            creds = session.get_credentials()
-            if not creds:
-                raise RuntimeError("No AWS credentials found (neither static keys nor IRSA)")
-            self._credentials = creds
-            self._has_static_keys = False
-            self._session = session
+        self._initial_access_key = access_key
+        self._initial_secret_key = secret_key
+        self._initial_token = token
+        self._has_static_keys = bool(access_key and secret_key)
+        self._session = None
+        self._credentials = None
 
         role_to_assume = assume_role_arn or AWS_ASSUME_ROLE
         self._role_to_assume = role_to_assume
-        if role_to_assume:
-            self._assume_role(role_to_assume)
+
+        self._last_init_at = None
+
+        self.init_credentials()
+
+    def init_credentials(self) -> None:
+
+        try:
+            if self._has_static_keys:
+                self._credentials = Credentials(self._initial_access_key, self._initial_secret_key, self._initial_token)
+                self._session = None
+            else:
+                # IRSA
+                session = boto3.Session()
+                creds = session.get_credentials()
+                if not creds:
+                    raise RuntimeError("No AWS credentials found (neither static keys nor IRSA)")
+                self._credentials = creds
+                self._session = session
+
+            role_to_assume = self._role_to_assume
+            if role_to_assume:
+                self._assume_role(role_to_assume)
+
+            self._last_init_at = datetime.utcnow()
+        except Exception:
+            logging.exception("Failed to initialize credentials")
+            raise
 
     def _assume_role(self, role_arn: str) -> None:
         try:
@@ -80,6 +99,12 @@ class AWSPrometheusConnect(CustomPrometheusConnect):
 
     def _build_auth(self) -> SigV4Auth:
         """Builds fresh SigV4 auth with current credentials (handles rotation)."""
+        try:
+            if self._last_init_at is None or (datetime.utcnow() - self._last_init_at).total_seconds() >= AWS_REFRESH_CREDS_SEC:
+                logging.debug("%d seconds passed; re-initializing AWS credentials", AWS_REFRESH_CREDS_SEC)
+                self.init_credentials()
+        except Exception:
+            logging.exception("Time-based credential refresh failed")
         frozen = self._credentials.get_frozen_credentials()
         return SigV4Auth(frozen, self.service_name, self.region)
 
@@ -98,24 +123,6 @@ class AWSPrometheusConnect(CustomPrometheusConnect):
             params=params,
         )
 
-    def _refresh_credentials(self) -> None:
-        """
-            Boto should automatically refresh expired credentials but when assuming role it cant be done automatically
-        """
-        try:
-            if not self._has_static_keys and self._session is not None:
-                # this is also needed for assume role if base credentials fails
-                refreshed = self._session.get_credentials()
-                if refreshed:
-                    self._credentials = refreshed
-        except Exception:
-            logging.exception("Failed to refresh session credentials")
-        if self._role_to_assume:
-            try:
-                self._assume_role(self._role_to_assume)
-            except Exception:
-                logging.exception("Failed to refresh assume role")
-
     def _request_with_refresh(self, *, method, url, data=None, params=None, headers=None, verify=False):
         resp = self.signed_request(
             method=method,
@@ -126,7 +133,8 @@ class AWSPrometheusConnect(CustomPrometheusConnect):
             headers=headers,
         )
         if resp is not None and resp.status_code in (400, 401, 403):
-            self._refresh_credentials()
+            logging.warning("Auth failure %s, re-initializing credentials", resp.status_code)
+            self.init_credentials()
             resp = self.signed_request(
                 method=method,
                 url=url,
