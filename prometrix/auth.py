@@ -22,7 +22,7 @@ class PrometheusAuthorization:
     @classmethod
     def get_authorization_headers(cls, config: PrometheusConfig) -> Dict:
         if isinstance(config, CoralogixPrometheusConfig):
-            return {"token": config.prometheus_token}
+            return {"Authorization": (f"Bearer {config.prometheus_token}")}
         elif config.prometheus_auth:
             return {"Authorization": config.prometheus_auth.get_secret_value()}
         elif cls.azure_authorization(config):
