@@ -19,6 +19,7 @@ class CustomPrometheusConnect(PrometheusConnect):
             url=config.url, disable_ssl=config.disable_ssl, headers=config.headers
         )
         self.config = config
+        self.ssl_verification = not config.disable_ssl
         self._session = requests.Session()
         self._session.mount(self.url, HTTPAdapter(pool_maxsize=10, pool_block=True))
 
