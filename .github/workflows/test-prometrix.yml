@@ -32,14 +32,24 @@ jobs:
           helm install kind-prometheus prometheus-community/kube-prometheus-stack --namespace prometheus --set prometheus.service.nodePort=30000 --set prometheus.service.type=NodePort --set grafana.service.nodePort=31000 --set grafana.service.type=NodePort --set alertmanager.service.nodePort=32000 --set alertmanager.service.type=NodePort --set prometheus-node-exporter.service.nodePort=32001 --set prometheus-node-exporter.service.type=NodePort
       - name: Kind deployment diagnostics
         run: |
-          echo "=== CONTEXTS ==="
-          kubectl config get-contexts
-          echo "=== NAMESPACES ==="
-          kubectl get namespaces
-          echo "=== PODS ==="
-          kubectl get pods --all-namespaces
-          echo "=== SERVICES ==="
-          kubectl get services --all-namespaces
+          for i in $(seq 1 12); do
+            echo "=== Attempt $i ==="
+            echo "=== CONTEXTS ==="
+            kubectl config get-contexts
+            echo "=== NAMESPACES ==="
+            kubectl get namespaces
+            echo "=== PODS ==="
+            kubectl get pods --all-namespaces
+            echo "=== SERVICES ==="
+            kubectl get services --all-namespaces
+            if kubectl get pods -n prometheus --no-headers | grep kind-prometheus-kube-prome-prometheus | grep -q Running; then
+              echo "kind-prometheus-kube-prome-prometheus is Running"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "kind-prometheus-kube-prome-prometheus did not reach Running state"
+          exit 1
 
       - name: Install Prometrix
         run: |
