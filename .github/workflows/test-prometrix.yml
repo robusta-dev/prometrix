@@ -46,6 +46,7 @@ jobs:
               echo "kind-prometheus-kube-prome-prometheus is Running"
               exit 0
             fi
+            echo "kind-prometheus-kube-prome-prometheus is not Running yet, waiting 5s before retrying..."
             sleep 5
           done
           echo "kind-prometheus-kube-prome-prometheus did not reach Running state"
