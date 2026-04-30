@@ -12,7 +12,7 @@ description = "A Python Prometheus client for all Prometheus instances."
 
 [tool.poetry.dependencies]
 python = ">=3.10,<4.0"
-urllib3 = ">=2.6.0,<3.0.0" # pinned to patch urllib3 cves
+urllib3 = ">=2.6.3,<3.0.0" # pinned to patch urllib3 cves
 botocore = "^1.38"
 boto3 = "^1.38"
 pydantic = ">=1.8.1,<3"
