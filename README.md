@@ -26,7 +26,7 @@ pip install prometrix
 ```
 
 
-> **⚠️ Note:** For Python **3.8 support**, you must use version **0.2.3 or below** of `prometrix`.  
+> **⚠️ Note:** For Python **3.8 support**, you must use version **0.2.3 or below** of `prometrix`.
 > From `0.2.4` onward, `prometrix` requires **Python ≥ 3.9**.
 
 Usage
@@ -83,6 +83,8 @@ azure_config = AzurePrometheusConfig(
 )
 azure_client = get_custom_prometheus_connect(azure_config)
 ```
+
+prometrix supports Azure Managed Identity and Azure Workload Identity. See [Azure Authentication Setup](/azure-auth-setup.rst) for more details.
 
 Similar configuration and creation can be done for EKS, Thanos, and Victoria Metrics Prometheus.
 
