@@ -1,4 +1,5 @@
 import logging
+import os
 from typing import Dict, no_type_check
 
 import requests
@@ -16,7 +17,9 @@ class PrometheusAuthorization:
         if not isinstance(config, AzurePrometheusConfig):
             return False
         return (config.azure_client_id != "" and config.azure_tenant_id != "") and (
-            config.azure_client_secret != "" or config.azure_use_managed_id != ""
+            config.azure_client_secret != "" or     # Service Principal Auth
+            config.azure_use_managed_id != False or # Managed Identity Auth
+            config.azure_use_workload_id != False   # Workload Identity Auth
         )
 
     @classmethod
@@ -48,15 +51,47 @@ class PrometheusAuthorization:
     @no_type_check
     @classmethod
     def _post_azure_token_endpoint(cls, config: PrometheusConfig):
-        return requests.post(
-            url=config.azure_token_endpoint,
-            headers={"Content-Type": "application/x-www-form-urlencoded"},
-            data={
+        token_file_path = "/var/run/secrets/azure/tokens/azure-identity-token"
+        token = None
+
+        # Try Azure Workload Identity if token file exists
+        if os.path.exists(token_file_path):
+            try:
+                with open(token_file_path, "r") as token_file:
+                    token = token_file.read().strip()
+                    if token:
+                        data = {
+                            "grant_type": "client_credentials",
+                            "client_assertion_type": "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
+                            "client_assertion": token,
+                            "client_id": config.azure_client_id,
+                            "scope": f"{config.azure_resource}/.default",
+                        }
+                    else:
+                        token = None  # Empty file, fall back to Service Principal
+            except Exception as e:
+                logging.warning(f"Failed to read workload identity token file: {e}")
+                token = None  # Fall back to Service Principal
+        else:
+            logging.info("Workload identity token file not found, using Service Principal authentication")
+
+        # Fallback to Azure Service Principal
+        if not token:
+            if config.azure_use_workload_id:
+                return {
+                    "ok": False,
+                    "reason": f"Workload identity requested but token file {token_file_path} not found or empty",
+                }
+            data = {
                 "grant_type": "client_credentials",
                 "client_id": config.azure_client_id,
                 "client_secret": config.azure_client_secret,
                 "resource": config.azure_resource,
-            },
+            }
+        return requests.post(
+            url=config.azure_token_endpoint,
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+            data=data,
         )
 
     @classmethod
@@ -67,7 +102,7 @@ class PrometheusAuthorization:
             try:
                 if config.azure_use_managed_id:
                     res = cls._get_azure_metadata_endpoint(config)
-                else:
+                else:  # Service Principal and Workload Identity
                     res = cls._post_azure_token_endpoint(config)
             except Exception:
                 logging.exception(

@@ -1,4 +1,5 @@
 from enum import Enum
+import os
 from typing import Dict, List, Optional
 
 try:
@@ -69,12 +70,13 @@ class VictoriaMetricsPrometheusConfig(PrometheusConfig):
 # Does not support labels according to the docs, See below for apis
 # https://learn.microsoft.com/en-us/azure/azure-monitor/essentials/prometheus-api-promql#supported-apis
 class AzurePrometheusConfig(PrometheusConfig):
-    azure_resource: str
-    azure_metadata_endpoint: str
-    azure_token_endpoint: str
-    azure_use_managed_id: Optional[str] = None
+    azure_resource: str = "https://prometheus.monitor.azure.com"
+    azure_metadata_endpoint: str = "http://169.254.169.254/metadata/identity/oauth2/token"
+    azure_token_endpoint: str = f"https://login.microsoftonline.com/{os.environ.get('AZURE_TENANT_ID')}/oauth2/token"
+    azure_use_managed_id: Optional[bool] = False
+    azure_use_workload_id: Optional[bool] = False
     azure_client_id: Optional[str] = None
-    azure_tenant_id: Optional[str] = None
+    azure_tenant_id: Optional[str] = os.environ.get('AZURE_TENANT_ID', '')
     azure_client_secret: Optional[str] = None
     supported_apis: List[PrometheusApis] = [
         PrometheusApis.QUERY,
