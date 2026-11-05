@@ -7,7 +7,7 @@ on:
     types: [opened, reopened]
 
 jobs:
-  run_tests:
+  tests:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -78,3 +78,9 @@ jobs:
         run: |
           sleep 10
           python tests/main.py tests/config_github_kind.yaml
+
+  run_tests:
+    needs: tests
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Tests passed on all pydantic versions"
