@@ -9,6 +9,10 @@ on:
 jobs:
   run_tests:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        pydantic: ["1.10.*", "2.*"]
     steps:
 
       - uses: actions/checkout@v5
@@ -57,6 +61,7 @@ jobs:
           curl -sSL https://install.python-poetry.org | python3 - --version 1.4.0
           poetry config virtualenvs.create false
           poetry install --with test
+          pip install "pydantic==${{ matrix.pydantic }}"
 
       - name: Setup Prometrix <-> Github runner tunnel
         uses: vbem/k8s-port-forward@v1
